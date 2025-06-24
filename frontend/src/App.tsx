@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -16,6 +16,41 @@ function App() {
   const [startTimeIdx, setStartTimeIdx] = useState<number>(21); // 7:30 pm
   const [endTimeIdx, setEndTimeIdx] = useState<number>(24); // 9:00 pm
   const [courtOrder, setCourtOrder] = useState<string>('1,2,3,4,5,6'); // TODO: load from backend
+
+  // get court order on load
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/courtOrder`)
+      .then((response) => response.json())
+      .then((data) => {
+        setCourtOrder(data.order);
+      })
+      .catch((error) => {
+        alert('Failed to load court order. Please try again later.');
+        console.error('Error fetching court order:', error);
+      });
+  }, []);
+
+  const handleSubmit = () => {
+    // for now, just log the values and update court order
+    console.log({
+      username,
+      password,
+      date: dateOptions[dateIdx].value,
+      startTime: timeOptions[startTimeIdx],
+      endTime: timeOptions[endTimeIdx],
+      courtOrder,
+    });
+
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/courtOrder`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        order: courtOrder,
+      }),
+    });
+  };
 
   return (
     <PageContainer>
@@ -91,9 +126,7 @@ function App() {
               onChange={(e) => setCourtOrder(e.target.value)}
             />
           </div>
-          <button onClick={() => console.log(dateOptions[dateIdx].value)}>
-            Submit
-          </button>
+          <button onClick={handleSubmit}>Submit</button>
         </FormContainer>
       </ContentContainer>
     </PageContainer>
