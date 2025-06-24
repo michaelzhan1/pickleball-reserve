@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
-    "dev": "nodemon src/index.ts",
-    "build": "tsc"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "build": "echo 'No build step required'"
   },
   "keywords": [],
   "author": "",
@@ -17,12 +17,11 @@
     "express": "^5.1.0"
   },
   "devDependencies": {
-    "@types/express": "^5.0.3",
-    "@types/node": "^24.0.3",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "eslint": "^9.29.0",
+    "eslint-config-prettier": "^10.1.5",
+    "globals": "^16.2.0",
     "nodemon": "^3.1.10",
-    "prettier": "^3.6.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "prettier": "^3.6.0"
   }
 }
