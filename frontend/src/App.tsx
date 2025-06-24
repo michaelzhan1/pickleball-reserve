@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import {
+  getCourtOrder,
+  updateCourtOrder,
+} from '@/services/court-order.service';
+import { attemptLogin } from '@/services/login-check.service';
+import {
   generateDateOptions,
   generateTimeOptions,
 } from '@/utils/datetime.util';
@@ -15,19 +20,17 @@ function App() {
   const [dateIdx, setDateIdx] = useState<number>(0);
   const [startTimeIdx, setStartTimeIdx] = useState<number>(21); // 7:30 pm
   const [endTimeIdx, setEndTimeIdx] = useState<number>(24); // 9:00 pm
-  const [courtOrder, setCourtOrder] = useState<string>('1,2,3,4,5,6'); // TODO: load from backend
+  const [courtOrder, setCourtOrder] = useState<string>('');
 
   // get court order on load
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/courtOrder`)
-      .then((response) => response.json())
-      .then((data) => {
-        setCourtOrder(data.order);
-      })
-      .catch((error) => {
-        alert('Failed to load court order. Please try again later.');
-        console.error('Error fetching court order:', error);
-      });
+    getCourtOrder().then((res) => {
+      if ('error' in res) {
+        alert(`Error fetching court order: ${res.error}`);
+      } else {
+        setCourtOrder(res.order);
+      }
+    });
   }, []);
 
   const handleSubmit = () => {
@@ -41,14 +44,16 @@ function App() {
       courtOrder,
     });
 
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/courtOrder`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        order: courtOrder,
-      }),
+    updateCourtOrder(courtOrder).then((res) => {
+      if ('error' in res) {
+        alert(`Error updating court order: ${res.error}`);
+      }
+    });
+
+    attemptLogin(username, password).then((res) => {
+      if ('error' in res) {
+        alert(`Login failed: ${res.error}`);
+      }
     });
   };
 

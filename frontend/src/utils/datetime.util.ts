@@ -49,7 +49,7 @@ export function generateDateOptions(): DateOption[] {
 
 export function generateTimeOptions(): string[] {
   const times = [];
-  let time = 8;
+  let time = 9;
   let hourString: string;
   while (time <= 22) {
     hourString = `${(time - 1) % 12 + 1 < 10 ? '0' : ''}${(time - 1) % 12 + 1}`
