@@ -5,7 +5,8 @@ import {
   getCourtOrder,
   updateCourtOrder,
 } from '@/services/court-order.service';
-import { attemptLogin } from '@/services/login-check.service';
+// import { attemptLogin } from '@/services/login-check.service'; // TODO: uncomment
+import { attemptReserve } from '@/services/reserve.service';
 import {
   generateDateOptions,
   generateTimeOptions,
@@ -35,14 +36,20 @@ function App() {
 
   const handleSubmit = () => {
     // for now, just log the values and update court order
-    console.log({
+    const body = {
       username,
       password,
       date: dateOptions[dateIdx].value,
-      startTime: timeOptions[startTimeIdx],
-      endTime: timeOptions[endTimeIdx],
+      startTimeIdx,
+      endTimeIdx,
       courtOrder,
-    });
+    };
+    console.log(body);
+
+    if (endTimeIdx <= startTimeIdx) {
+      alert('End time must be after start time.');
+      return;
+    }
 
     updateCourtOrder(courtOrder).then((res) => {
       if ('error' in res) {
@@ -50,10 +57,21 @@ function App() {
       }
     });
 
-    attemptLogin(username, password).then((res) => {
-      console.log('Login check successful');
+    // TODO: uncomment
+    // attemptLogin(username, password).then((res) => {
+    //   console.log('Login check successful');
+    //   if ('error' in res) {
+    //     alert(`Login failed: ${res.error}`);
+    //   }
+    // });
+
+    attemptReserve(body).then((res) => {
       if ('error' in res) {
-        alert(`Login failed: ${res.error}`);
+        alert(`Reservation failed: ${res.error}`);
+      } else if (res.success) {
+        alert('Reservation successful!');
+      } else {
+        alert('Reservation failed for an unknown reason.');
       }
     });
   };

@@ -2,12 +2,12 @@ import { chromium } from 'playwright';
 
 export async function attemptLogin(username, password) {
   const browser = await chromium.launch({
-    headless: false,
+    headless: false, // TODO: remove for production
   });
   const context = await browser.newContext();
   const page = await context.newPage();
 
-  let errorMessage = '';
+  let errorMessage = null;
   try {
     // Navigate to the login page
     await page.goto('https://secure.rec1.com/TX/up-tx/catalog');
@@ -42,7 +42,7 @@ export async function attemptLogin(username, password) {
   } catch (error) {
     return {
       success: false,
-      errorMessage: errorMessage || 'An unexpected error occurred during login attempt.',
+      errorMessage: errorMessage || error.message || 'An unexpected error occurred during login attempt.',
     };
   } finally {
     await browser.close();

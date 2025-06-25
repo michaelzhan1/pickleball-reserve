@@ -27,7 +27,7 @@ const numToMonth: { [key: number]: string } = {
 
 export function generateDateOptions(): DateOption[] {
   const date: Date = new Date();
-  date.setDate(date.getDate() + 3);
+  date.setDate(date.getDate()); // TDOO: CHANGE TO 3
 
   return Array.from({ length: 7 }).map(() => {
     const day = numToDay[date.getDay()];
@@ -49,7 +49,7 @@ export function generateDateOptions(): DateOption[] {
 
 export function generateTimeOptions(): string[] {
   const times = [];
-  let time = 9;
+  let time = 8;
   let hourString: string;
   while (time <= 22) {
     hourString = `${(time - 1) % 12 + 1 < 10 ? '0' : ''}${(time - 1) % 12 + 1}`

@@ -1,5 +1,6 @@
 import { getOrder, setOrder } from './courtOrder.js';
 import { attemptLogin } from './loginCheck.js';
+import { attemptReserve } from './reserve.js';
 import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
@@ -10,7 +11,7 @@ const corsOptions = {
   origin: process.env.FRONTEND_URL || '*', // Allow all origins by default
 };
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.get('/', (_req, res) => {
@@ -55,6 +56,28 @@ app.post('/loginCheck', async (req, res) => {
       res.status(401).json({ error: errorMessage });
     }
   });
+});
+
+app.post('/reserve', async (req, res) => {
+  const { username, password, date, startTimeIdx, endTimeIdx, courtOrder } =
+    req.body;
+  console.log('Attempting to reserve court...');
+  attemptReserve(username, password, date, startTimeIdx, endTimeIdx, courtOrder)
+    .then(({ success, errorMessage }) => {
+      if (success) {
+        console.log('Reservation successful');
+        res.json({ success });
+      } else {
+        console.error('Reservation failed:', errorMessage);
+        res.status(400).json({ error: errorMessage });
+      }
+    })
+    .catch((error) => {
+      console.error('Unexpected error during reservation:', error);
+      res
+        .status(500)
+        .json({ error: 'An unexpected error occurred during reservation.' });
+    });
 });
 
 app.listen(port, () => {
