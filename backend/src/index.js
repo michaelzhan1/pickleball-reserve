@@ -44,10 +44,16 @@ app.put('/courtOrder', (req, res) => {
 });
 
 app.post('/loginCheck', async (req, res) => {
-  console.log('attempting')
+  console.log('Checking login credentials...');
   const { username, password } = req.body;
-  attemptLogin(username, password).then((result) => {
-    res.json({ success: result });
+  attemptLogin(username, password).then(({ success, errorMessage }) => {
+    if (success) {
+      console.log('Login successful');
+      res.json({ success });
+    } else {
+      console.error('Login failed:', errorMessage);
+      res.status(401).json({ error: errorMessage });
+    }
   });
 });
 

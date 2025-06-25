@@ -51,6 +51,7 @@ function App() {
     });
 
     attemptLogin(username, password).then((res) => {
+      console.log('Login check successful');
       if ('error' in res) {
         alert(`Login failed: ${res.error}`);
       }
