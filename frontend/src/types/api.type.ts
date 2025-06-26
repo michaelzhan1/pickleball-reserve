@@ -1,14 +1,7 @@
-import { DateParts } from "@/types/datetime.type";
+import { ReserveInfo } from "@/types/reserve.type";
 
 // request types
-export interface ReserveRequest {
-  username: string;
-  password: string;
-  date: DateParts;
-  startTimeIdx: number;
-  endTimeIdx: number;
-  courtOrder: string;
-}
+export type ScheduleRequest = ReserveInfo;
 
 // response types
 export interface ErrorResponse {
@@ -23,7 +16,11 @@ export interface LoginCheckResponse {
   success: boolean;
 }
 
-export interface ReserveResponse {
+export interface GetAllScheduledReservationsResponse {
+  reservations: ReserveInfo[];
+}
+
+export interface MakeScheduleResponse {
   success: boolean;
 }
 

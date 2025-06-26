@@ -2,7 +2,7 @@ import { chromium } from 'playwright';
 
 export async function attemptLogin(username, password) {
   const browser = await chromium.launch({
-    headless: false, // TODO: remove for production
+    headless: true,
   });
   const context = await browser.newContext();
   const page = await context.newPage();

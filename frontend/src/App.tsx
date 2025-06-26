@@ -6,8 +6,12 @@ import {
   getCourtOrder,
   updateCourtOrder,
 } from '@/services/court-order.service';
-// import { attemptLogin } from '@/services/login-check.service'; // TODO: uncomment
-import { attemptReserve } from '@/services/reserve.service';
+import {
+  getAllScheduledReservations,
+  scheduleReservation,
+} from '@/services/schedule.service';
+import { ReserveInfo } from '@/types/reserve.type';
+import { attemptLogin } from '@/services/login-check.service';
 import {
   generateDateOptions,
   generateTimeOptions,
@@ -23,6 +27,8 @@ function App() {
   const [startTimeIdx, setStartTimeIdx] = useState<number>(21); // 7:30 pm
   const [endTimeIdx, setEndTimeIdx] = useState<number>(24); // 9:00 pm
   const [courtOrder, setCourtOrder] = useState<string>('');
+
+  const [reservations, setReservations] = useState<ReserveInfo[]>([]);
 
   const [authPassword, setAuthPassword] = useState<string>('');
   const [authPassed, setAuthPassed] = useState<boolean>(false);
@@ -58,6 +64,13 @@ function App() {
         setCourtOrder(res.order);
       }
     });
+    getAllScheduledReservations().then((res) => {
+      if ('error' in res) {
+        alert(`Error fetching scheduled reservations: ${res.error}`);
+      } else {
+        setReservations(res.reservations);
+      }
+    });
   }, []);
 
   const handleSubmit = () => {
@@ -70,7 +83,6 @@ function App() {
       endTimeIdx,
       courtOrder,
     };
-    console.log(body);
 
     if (endTimeIdx <= startTimeIdx) {
       alert('End time must be after start time.');
@@ -83,21 +95,20 @@ function App() {
       }
     });
 
-    // TODO: uncomment
-    // attemptLogin(username, password).then((res) => {
-    //   console.log('Login check successful');
-    //   if ('error' in res) {
-    //     alert(`Login failed: ${res.error}`);
-    //   }
-    // });
-
-    attemptReserve(body).then((res) => {
+    attemptLogin(username, password).then((res) => {
+      console.log('Login check successful');
       if ('error' in res) {
-        alert(`Reservation failed: ${res.error}`);
+        alert(`Login failed: ${res.error}`);
+      }
+    });
+
+    scheduleReservation(body).then((res) => {
+      if ('error' in res) {
+        alert(`Reservation schedule failed: ${res.error}`);
       } else if (res.success) {
-        alert('Reservation successful!');
+        alert('Reservation schedule successful!');
       } else {
-        alert('Reservation failed for an unknown reason.');
+        alert('Reservation schedule failed for an unknown reason.');
       }
     });
   };
@@ -106,7 +117,7 @@ function App() {
     <PageContainer>
       {!authPassed ? (
         <FormContainer style={{ maxWidth: '400px' }}>
-          <div className="form-field">
+          <div className='form-field'>
             <label htmlFor='auth'>Enter password:</label>
             <input
               id='auth'
@@ -195,6 +206,18 @@ function App() {
               </div>
               <button onClick={handleSubmit}>Submit</button>
             </FormContainer>
+            <JobContainer>
+              <h2>Scheduled Reservations</h2>
+              <JobList>
+                {reservations.map((reservation, idx) => (
+                  <li key={idx}>
+                    <strong>{reservation.username}:</strong>{' '}
+                    {`${reservation.date.month + 1}/${reservation.date.date}/${reservation.date.year} `}
+                    {`from ${timeOptions[reservation.startTimeIdx]} to ${timeOptions[reservation.endTimeIdx]}`}
+                  </li>
+                ))}
+              </JobList>
+            </JobContainer>
           </ContentContainer>
         </>
       )}
@@ -273,6 +296,25 @@ const FormContainer = styled.div`
       background-color: #004080;
     }
   }
+`;
+
+const JobContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  height: 100%;
+
+  > * {
+    flex: 0;
+  }
+`;
+
+const JobList = styled.ul`
+  list-style: none;
+  flex: 2;
+  height: 100%;
 `;
 
 export default App;

@@ -15,7 +15,7 @@ export async function attemptReserve(
   const courts = courtOrder.split(',').map((court) => Number(court.trim()));
 
   const browser = await chromium.launch({
-    headless: false, // TODO: remove for production
+    headless: true,
   });
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -168,6 +168,6 @@ export async function attemptReserve(
         'An unexpected error occurred during reservation attempt.',
     };
   } finally {
-    // await browser.close(); // TODO: uncomment
+    await browser.close();
   }
 }

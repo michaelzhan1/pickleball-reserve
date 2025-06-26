@@ -1,10 +1,10 @@
-import { getOrder, setOrder } from './courtOrder.js';
-import { attemptLogin } from './loginCheck.js';
-import { attemptReserve } from './reserve.js';
-import { authCheck } from './auth.js';
 import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
+import { authCheck } from './auth.js';
+import { getOrder, setOrder } from './courtOrder.js';
+import { attemptLogin } from './loginCheck.js';
+import { addReservation, getAllReservations } from './schedule.js';
 
 const app = express();
 const port = 3000;
@@ -68,26 +68,22 @@ app.post('/loginCheck', async (req, res) => {
   });
 });
 
-app.post('/reserve', async (req, res) => {
-  const { username, password, date, startTimeIdx, endTimeIdx, courtOrder } =
-    req.body;
-  console.log('Attempting to reserve court...');
-  attemptReserve(username, password, date, startTimeIdx, endTimeIdx, courtOrder)
-    .then(({ success, errorMessage }) => {
-      if (success) {
-        console.log('Reservation successful');
-        res.json({ success });
-      } else {
-        console.error('Reservation failed:', errorMessage);
-        res.status(400).json({ error: errorMessage });
-      }
-    })
-    .catch((error) => {
-      console.error('Unexpected error during reservation:', error);
-      res
-        .status(500)
-        .json({ error: 'An unexpected error occurred during reservation.' });
-    });
+app.get('/schedule', async (_req, res) => {
+  res.json({ reservations: getAllReservations()});
+});
+
+app.post('/schedule', async (req, res) => {
+  const { username, password, date, startTimeIdx, endTimeIdx, courtOrder } = req.body;
+  console.log('Scheduling reservation...');
+  addReservation(
+    username,
+    password,
+    date,
+    startTimeIdx,
+    endTimeIdx,
+    courtOrder
+  );
+  res.json({ success: true });
 });
 
 app.listen(port, () => {

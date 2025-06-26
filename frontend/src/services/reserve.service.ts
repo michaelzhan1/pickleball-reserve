@@ -1,8 +1,8 @@
-import { ErrorResponse, ReserveRequest, ReserveResponse } from '@/types/api.type';
+import { ErrorResponse, ScheduleRequest, MakeScheduleResponse } from '@/types/api.type';
 
 export async function attemptReserve(
-  body: ReserveRequest,
-): Promise<ReserveResponse | ErrorResponse> {
+  body: ScheduleRequest,
+): Promise<MakeScheduleResponse | ErrorResponse> {
   return fetch(`${import.meta.env.VITE_BACKEND_URL}/reserve`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
