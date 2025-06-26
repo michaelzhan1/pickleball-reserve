@@ -26,3 +26,7 @@ export interface LoginCheckResponse {
 export interface ReserveResponse {
   success: boolean;
 }
+
+export interface AuthResponse {
+  success: boolean;
+}

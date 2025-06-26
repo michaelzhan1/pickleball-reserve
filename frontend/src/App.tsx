@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import { attemptAuth } from '@/services/auth.service';
 import {
   getCourtOrder,
   updateCourtOrder,
@@ -22,6 +23,31 @@ function App() {
   const [startTimeIdx, setStartTimeIdx] = useState<number>(21); // 7:30 pm
   const [endTimeIdx, setEndTimeIdx] = useState<number>(24); // 9:00 pm
   const [courtOrder, setCourtOrder] = useState<string>('');
+
+  const [authPassword, setAuthPassword] = useState<string>('');
+  const [authPassed, setAuthPassed] = useState<boolean>(false);
+
+  // load auth cookie
+  useEffect(() => {
+    const authCookie = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('auth='));
+    if (authCookie) {
+      setAuthPassed(true);
+    }
+  }, []);
+
+  // handle auth submit
+  const handleAuthSubmit = () => {
+    attemptAuth(authPassword).then((res) => {
+      if ('error' in res) {
+        alert(`Authentication failed: ${res.error}`);
+      } else {
+        setAuthPassed(true);
+        document.cookie = `auth=${authPassword}; path=/; max-age=3600`; // 1 hour
+      }
+    });
+  };
 
   // get court order on load
   useEffect(() => {
@@ -78,81 +104,100 @@ function App() {
 
   return (
     <PageContainer>
-      <h1>Court Reservation</h1>
-      <ContentContainer>
-        <FormContainer>
-          <div className='form-field'>
-            <label htmlFor='username'>Username</label>
+      {!authPassed ? (
+        <FormContainer style={{ maxWidth: '400px' }}>
+          <div className="form-field">
+            <label htmlFor='auth'>Enter password:</label>
             <input
-              id='username'
-              type='text'
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          <div className='form-field'>
-            <label htmlFor='password'>Password</label>
-            <input
-              id='password'
+              id='auth'
               type='password'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={authPassword}
+              onChange={(e) => setAuthPassword(e.target.value)}
             />
           </div>
-          <div className='form-field'>
-            <label htmlFor='date'>Date</label>
-            <select
-              id='date'
-              value={dateIdx}
-              onChange={(e) => setDateIdx(parseInt(e.target.value, 10))}
-            >
-              {dateOptions.map(({ label }, i) => (
-                <option key={i} value={i}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className='form-field'>
-            <label htmlFor='start-time'>Start Time</label>
-            <select
-              id='start-time'
-              value={startTimeIdx}
-              onChange={(e) => setStartTimeIdx(parseInt(e.target.value, 10))}
-            >
-              {timeOptions.map((time, i) => (
-                <option key={i} value={i}>
-                  {time}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className='form-field'>
-            <label htmlFor='end-time'>End Time</label>
-            <select
-              id='end-time'
-              value={endTimeIdx}
-              onChange={(e) => setEndTimeIdx(parseInt(e.target.value, 10))}
-            >
-              {timeOptions.map((time, i) => (
-                <option key={i} value={i}>
-                  {time}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className='form-field'>
-            <label htmlFor='court-order'>Court Order</label>
-            <input
-              id='court-order'
-              type='text'
-              value={courtOrder}
-              onChange={(e) => setCourtOrder(e.target.value)}
-            />
-          </div>
-          <button onClick={handleSubmit}>Submit</button>
+          <button onClick={handleAuthSubmit}>Submit</button>
         </FormContainer>
-      </ContentContainer>
+      ) : (
+        <>
+          <h1>Court Reservation</h1>
+          <ContentContainer>
+            <FormContainer>
+              <div className='form-field'>
+                <label htmlFor='username'>Username</label>
+                <input
+                  id='username'
+                  type='text'
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              </div>
+              <div className='form-field'>
+                <label htmlFor='password'>Password</label>
+                <input
+                  id='password'
+                  type='password'
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <div className='form-field'>
+                <label htmlFor='date'>Date</label>
+                <select
+                  id='date'
+                  value={dateIdx}
+                  onChange={(e) => setDateIdx(parseInt(e.target.value, 10))}
+                >
+                  {dateOptions.map(({ label }, i) => (
+                    <option key={i} value={i}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className='form-field'>
+                <label htmlFor='start-time'>Start Time</label>
+                <select
+                  id='start-time'
+                  value={startTimeIdx}
+                  onChange={(e) =>
+                    setStartTimeIdx(parseInt(e.target.value, 10))
+                  }
+                >
+                  {timeOptions.map((time, i) => (
+                    <option key={i} value={i}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className='form-field'>
+                <label htmlFor='end-time'>End Time</label>
+                <select
+                  id='end-time'
+                  value={endTimeIdx}
+                  onChange={(e) => setEndTimeIdx(parseInt(e.target.value, 10))}
+                >
+                  {timeOptions.map((time, i) => (
+                    <option key={i} value={i}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className='form-field'>
+                <label htmlFor='court-order'>Court Order</label>
+                <input
+                  id='court-order'
+                  type='text'
+                  value={courtOrder}
+                  onChange={(e) => setCourtOrder(e.target.value)}
+                />
+              </div>
+              <button onClick={handleSubmit}>Submit</button>
+            </FormContainer>
+          </ContentContainer>
+        </>
+      )}
     </PageContainer>
   );
 }
