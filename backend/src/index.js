@@ -15,10 +15,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-app.get('/', (_req, res) => {
-  res.send('Hello World!');
-});
-
 app.post('/auth', (req, res) => {
   const { password } = req.body;
   if (authCheck(password)) {
@@ -42,7 +38,7 @@ app.put('/courtOrder', (req, res) => {
       return;
     }
     setOrder(order);
-    res.json({ order: getOrder() });
+    res.json({ success: true });
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).json({ error: error.message });

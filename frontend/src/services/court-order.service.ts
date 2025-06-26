@@ -1,7 +1,7 @@
-import { CourtOrderResponse, ErrorResponse } from '@/types/api.type';
+import { GetCourtOrderResponse, ErrorResponse, PutCourtOrderResponse } from '@/types/api.type';
 
 export async function getCourtOrder(): Promise<
-  CourtOrderResponse | ErrorResponse
+  GetCourtOrderResponse | ErrorResponse
 > {
   return fetch(`${import.meta.env.VITE_BACKEND_URL}/courtOrder`, {
     method: 'GET',
@@ -11,7 +11,7 @@ export async function getCourtOrder(): Promise<
 
 export async function updateCourtOrder(
   courtOrder: string,
-): Promise<CourtOrderResponse | ErrorResponse> {
+): Promise<PutCourtOrderResponse | ErrorResponse> {
   return fetch(`${import.meta.env.VITE_BACKEND_URL}/courtOrder`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

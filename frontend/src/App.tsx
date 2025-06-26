@@ -111,6 +111,15 @@ function App() {
         alert('Reservation schedule failed for an unknown reason.');
       }
     });
+
+    // Refresh reservations after scheduling
+    getAllScheduledReservations().then((res) => {
+      if ('error' in res) {
+        alert(`Error fetching reservations: ${res.error}`);
+      } else {
+        setReservations(res.reservations);
+      }
+    });
   };
 
   return (
