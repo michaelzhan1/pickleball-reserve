@@ -27,7 +27,7 @@ const numToMonth: { [key: number]: string } = {
 
 export function generateDateOptions(): DateOption[] {
   const date: Date = new Date();
-  date.setDate(date.getDate()); // TDOO: CHANGE TO 3
+  date.setDate(date.getDate() + 1); // TODO: CHANGE TO 3
 
   return Array.from({ length: 7 }).map(() => {
     const day = numToDay[date.getDay()];

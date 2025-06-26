@@ -151,7 +151,7 @@ export async function attemptReserve(
 
     // confirm reservation
     await page.getByRole('button', { name: 'Add To Cart' }).click();
-    await page.getByRole('button', { name: 'Checkout' }).click();
+    await page.getByText('Checkout').click();
     await page.getByRole('button', { name: 'Review Transaction' }).click();
     await page.getByRole('button', { name: 'Complete Transaction' }).click();
 
@@ -168,6 +168,6 @@ export async function attemptReserve(
         'An unexpected error occurred during reservation attempt.',
     };
   } finally {
-    // await browser.close();
+    // await browser.close(); // TODO: uncomment
   }
 }
