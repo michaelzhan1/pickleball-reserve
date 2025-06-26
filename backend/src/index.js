@@ -1,5 +1,6 @@
 import { getOrder, setOrder } from './courtOrder.js';
 import { attemptLogin } from './loginCheck.js';
+import { authCheck } from './auth.js';
 import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
@@ -16,6 +17,15 @@ app.use(express.json());
 app.get('/', (_req, res) => {
   res.send('Hello World!');
 });
+
+app.post('/auth', (req, res) => {
+  const { password } = req.body;
+  if (authCheck(password)) {
+    res.json({ success: true });
+  } else {
+    res.status(401).json({ error: 'Authentication failed' });
+  }
+})
 
 app.get('/courtOrder', (_req, res) => {
   res.json({
@@ -43,6 +53,7 @@ app.put('/courtOrder', (req, res) => {
   }
 });
 
+// TODO: check that I handle fail case
 app.post('/loginCheck', async (req, res) => {
   console.log('attempting')
   const { username, password } = req.body;
