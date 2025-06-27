@@ -26,8 +26,8 @@ function App() {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [dateIdx, setDateIdx] = useState<number>(0);
-  const [startTimeIdx, setStartTimeIdx] = useState<number>(21); // 7:30 pm
-  const [endTimeIdx, setEndTimeIdx] = useState<number>(24); // 9:00 pm
+  const [startTimeIdx, setStartTimeIdx] = useState<number>(23); // 7:30 pm
+  const [endTimeIdx, setEndTimeIdx] = useState<number>(26); // 9:00 pm
   const [courtOrder, setCourtOrder] = useState<string>('');
 
   const [reservations, setReservations] = useState<ReserveInfo[]>([]);
@@ -101,6 +101,11 @@ function App() {
   }, []);
 
   const handleSubmit = async () => {
+    if (!username || !password) {
+      alert('Username and password are required.');
+      return;
+    }
+
     // for now, just log the values and update court order
     const body = {
       username,
@@ -110,6 +115,8 @@ function App() {
       endTimeIdx,
       courtOrder,
     };
+
+    console.log(body);
 
     if (endTimeIdx <= startTimeIdx) {
       alert('End time must be after start time.');
@@ -135,6 +142,7 @@ function App() {
       return;
     }
     console.log('Reservation scheduled successfully');
+    alert('Reservation scheduled successfully!');
 
     // Refresh reservations after scheduling
     refreshReservations();
@@ -288,6 +296,10 @@ const PageContainer = styled.div`
   justify-content: center;
   height: 100vh;
   padding: 20px 60px;
+
+  @media (max-width: 768px) {
+    justify-content: flex-start;
+  }
 `;
 
 const ContentContainer = styled.div`
@@ -302,6 +314,12 @@ const ContentContainer = styled.div`
 
   > * {
     flex: 1;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 `;
 

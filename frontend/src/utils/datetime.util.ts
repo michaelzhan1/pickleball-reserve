@@ -31,17 +31,17 @@ export function generateDateOptions(): DateOption[] {
 
   return Array.from({ length: 7 }).map(() => {
     const day = numToDay[date.getDay()];
-    const month = numToMonth[date.getMonth()];
+    const month = date.getMonth();
     const dateNumber = date.getDate();
     const year = date.getFullYear();
-    const description = `${day}, ${month} ${dateNumber}`;
+    const description = `${day}, ${numToMonth[month]} ${dateNumber}`;
     date.setDate(date.getDate() + 1);
     return {
       label: description,
       value: {
         dayString: day,
         date: dateNumber,
-        month: date.getMonth(),
+        month: month,
         year: year,
       },
     };
