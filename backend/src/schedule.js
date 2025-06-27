@@ -1,5 +1,6 @@
 import { attemptReserve } from './reserve.js';
 import { CronJob } from 'cron';
+import { v4 as uuidv4 } from 'uuid'
 
 const reservationMap = new Map(); // job id -> {username, password, date, startTimeIdx, endTimeIdx, courtOrder}[]
 const jobIdMap = new Map(); // date string -> job id
@@ -32,7 +33,7 @@ export function addReservation(
 
   // If a job ID for this date doesn't exist, create a new one
   if (!jobId) {
-    jobId = crypto.randomUUID();
+    jobId = uuidv4();
     jobIdMap.set(dateString, jobId);
     reservationMap.set(jobId, []);
 
