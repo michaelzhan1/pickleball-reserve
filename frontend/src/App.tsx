@@ -73,7 +73,7 @@ function App() {
     });
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // for now, just log the values and update court order
     const body = {
       username,
@@ -89,20 +89,20 @@ function App() {
       return;
     }
 
-    updateCourtOrder(courtOrder).then((res) => {
+    await updateCourtOrder(courtOrder).then((res) => {
       if ('error' in res) {
         alert(`Error updating court order: ${res.error}`);
       }
     });
 
-    attemptLogin(username, password).then((res) => {
+    await attemptLogin(username, password).then((res) => {
       console.log('Login check successful');
       if ('error' in res) {
         alert(`Login failed: ${res.error}`);
       }
     });
 
-    scheduleReservation(body).then((res) => {
+    await scheduleReservation(body).then((res) => {
       if ('error' in res) {
         alert(`Reservation schedule failed: ${res.error}`);
       } else if (res.success) {
@@ -113,7 +113,7 @@ function App() {
     });
 
     // Refresh reservations after scheduling
-    getAllScheduledReservations().then((res) => {
+    await getAllScheduledReservations().then((res) => {
       if ('error' in res) {
         alert(`Error fetching reservations: ${res.error}`);
       } else {

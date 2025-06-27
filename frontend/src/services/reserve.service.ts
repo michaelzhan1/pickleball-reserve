@@ -1,3 +1,5 @@
+// this isn't used anywhere but is helpful for running playwright directly
+
 import { ErrorResponse, ScheduleRequest, PostScheduleResponse } from '@/types/api.type';
 
 export async function attemptReserve(

@@ -71,7 +71,7 @@ app.get('/schedule', async (_req, res) => {
 app.post('/schedule', async (req, res) => {
   const { username, password, date, startTimeIdx, endTimeIdx, courtOrder } = req.body;
   console.log('Scheduling reservation...');
-  addReservation(
+  const result = addReservation(
     username,
     password,
     date,
@@ -79,7 +79,13 @@ app.post('/schedule', async (req, res) => {
     endTimeIdx,
     courtOrder
   );
-  res.json({ success: true });
+  if (result) {
+    console.log('Reservation scheduled successfully');
+    res.json({ success: true });
+  } else {
+    console.error('Failed to schedule reservation: Reservation already exists');
+    res.status(400).json({ error: 'Reservation already scheduled on this day' });
+  }
 });
 
 app.listen(port, () => {

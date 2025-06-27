@@ -78,10 +78,22 @@ export function addReservation(
     );
     job.start();
   }
+
+  const existingReservation = reservationMap.get(jobId).find(
+    (res) =>
+      res.username === username &&
+      res.date.year === date.year &&
+      res.date.month === date.month &&
+      res.date.date === date.date
+  );
+  if (existingReservation) {
+    return false; // Reservation already exists for this user on this date
+  }
+
   reservationMap.get(jobId).push(reservation);
 
   console.log(
     `Added reservation for ${username} on ${dateString} at times ${startTimeIdx}-${endTimeIdx} for courts ${courtOrder}.`,
   );
-  return jobId;
+  return true;
 }
