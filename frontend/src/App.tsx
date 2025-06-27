@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { FaTrash } from 'react-icons/fa';
 import styled from 'styled-components';
 
 import { attemptAuth } from '@/services/auth.service';
@@ -259,11 +260,11 @@ function App() {
                   <li key={idx}>
                     <span>
                       <strong>{reservation.username}:</strong>{' '}
-                      {`${reservation.date.month + 1}/${reservation.date.date}/${reservation.date.year} `}
+                      {`${reservation.date.dayString} ${reservation.date.month + 1}/${reservation.date.date}/${reservation.date.year} `}
                       {`from ${timeOptions[reservation.startTimeIdx]} to ${timeOptions[reservation.endTimeIdx]}`}
                     </span>
                     <button onClick={() => handleDelete(reservation)}>
-                      Delete
+                      <FaTrash />
                     </button>
                   </li>
                 ))}
@@ -366,6 +367,30 @@ const JobList = styled.ul`
   list-style: none;
   flex: 2;
   height: 100%;
+  padding: 0;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  > li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+
+    > button {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      color: #dc3545;
+      font-size: 16px;
+
+      :hover {
+        color: #c82333;
+      }
+    }
+  }
 `;
 
 export default App;

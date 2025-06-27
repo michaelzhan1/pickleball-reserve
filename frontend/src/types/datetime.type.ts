@@ -4,6 +4,7 @@ export interface DateOption {
 }
 
 export interface DateParts {
+  dayString: string;
   date: number;
   month: number;
   year: number;

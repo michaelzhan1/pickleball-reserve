@@ -39,6 +39,7 @@ export function generateDateOptions(): DateOption[] {
     return {
       label: description,
       value: {
+        dayString: day,
         date: dateNumber,
         month: date.getMonth(),
         year: year,
