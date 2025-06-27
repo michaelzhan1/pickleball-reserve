@@ -118,6 +118,7 @@ export async function attemptReserve(
           );
 
           // try end time
+          await page.waitForTimeout(500);
           const endSelector = timeSelectors.last();
           const endOptions = await endSelector
             .locator('option')
