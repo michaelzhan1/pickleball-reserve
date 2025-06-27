@@ -30,6 +30,7 @@ function App() {
   const [endTimeIdx, setEndTimeIdx] = useState<number>(26); // 9:00 pm
   const [courtOrder, setCourtOrder] = useState<string>('');
 
+  const [loading, setLoading] = useState<boolean>(false);
   const [reservations, setReservations] = useState<ReserveInfo[]>([]);
 
   const [authPassword, setAuthPassword] = useState<string>('');
@@ -106,6 +107,8 @@ function App() {
       return;
     }
 
+    setLoading(true);
+
     // for now, just log the values and update court order
     const body = {
       username,
@@ -116,22 +119,23 @@ function App() {
       courtOrder,
     };
 
-    console.log(body);
-
     if (endTimeIdx <= startTimeIdx) {
       alert('End time must be after start time.');
+      setLoading(false);
       return;
     }
 
     const courtOrderResponse = await updateCourtOrder(courtOrder);
     if ('error' in courtOrderResponse) {
       alert(`Error updating court order: ${courtOrderResponse.error}`);
+      setLoading(false);
       return;
     }
 
     const loginResponse = await attemptLogin(username, password);
     if ('error' in loginResponse) {
       alert(`Login failed: ${loginResponse.error}`);
+      setLoading(false);
       return;
     }
     console.log('Login successful');
@@ -139,13 +143,16 @@ function App() {
     const scheduleResponse = await scheduleReservation(body);
     if ('error' in scheduleResponse) {
       alert(`Reservation schedule failed: ${scheduleResponse.error}`);
+      setLoading(false);
       return;
     }
     console.log('Reservation scheduled successfully');
     alert('Reservation scheduled successfully!');
 
+    
     // Refresh reservations after scheduling
     refreshReservations();
+    setLoading(false);
   };
 
   const handleDelete = async (reservation: ReserveInfo) => {
@@ -263,7 +270,12 @@ function App() {
                   onChange={(e) => setCourtOrder(e.target.value)}
                 />
               </div>
-              <button onClick={handleSubmit}>Submit</button>
+              <div>
+                <button onClick={handleSubmit} disabled={loading}>Submit</button>
+                {loading && <svg viewBox='0 0 100 100'>
+                  <circle className='ring' cx='50' cy='50' r='40' />
+                </svg>}
+              </div>
             </FormContainer>
             <JobContainer>
               <h2>Scheduled Reservations</h2>
@@ -353,21 +365,54 @@ const FormContainer = styled.div`
     }
   }
 
-  > button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
+  > div {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 
-    &:hover {
-      background-color: #0056b3;
+    > button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+
+      &:disabled {
+        cursor: not-allowed;
+        background-color: #ccc;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: #0056b3;
+      }
+
+      &:active {
+        background-color: #004080;
+      }
     }
 
-    &:active {
-      background-color: #004080;
+    > svg {
+      width: 30px;
+      height: 30px;
+
+      .ring {
+        fill: none;
+        stroke: #a0a0a0;
+        stroke-width: 9;
+        stroke-linecap: round;
+        stroke-dasharray: 90;
+        stroke-dashoffset: 0;
+        animation: rotate 1s linear infinite;
+        transform-origin: 50% 50%;
+      }
+    }
+  }
+
+  @keyframes rotate {
+    100% {
+      transform: rotate(360deg);
     }
   }
 `;
