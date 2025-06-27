@@ -13,7 +13,6 @@ import {
   getAllScheduledReservations,
   scheduleReservation,
 } from '@/services/schedule.service';
-import { GetScheduleResponse } from '@/types/api.type';
 import { ReserveInfo } from '@/types/reserve.type';
 import {
   generateDateOptions,
@@ -58,6 +57,37 @@ function App() {
     });
   };
 
+  function refreshReservations() {
+    getAllScheduledReservations().then((res) => {
+      if ('error' in res) {
+        alert(`Error fetching scheduled reservations: ${res.error}`);
+      } else {
+        const reservations = res.reservations;
+
+        // sort reservations by date parts, then username
+        reservations.sort((a, b) => {
+          const dateA = new Date(
+            a.date.year,
+            a.date.month,
+            a.date.date,
+          ).getTime();
+          const dateB = new Date(
+            b.date.year,
+            b.date.month,
+            b.date.date,
+          ).getTime();
+
+          if (dateA !== dateB) {
+            return dateA - dateB;
+          }
+          return a.username.localeCompare(b.username);
+        });
+
+        setReservations(reservations);
+      }
+    });
+  }
+
   // get court order on load
   useEffect(() => {
     getCourtOrder().then((res) => {
@@ -67,13 +97,7 @@ function App() {
         setCourtOrder(res.order);
       }
     });
-    getAllScheduledReservations().then((res) => {
-      if ('error' in res) {
-        alert(`Error fetching scheduled reservations: ${res.error}`);
-      } else {
-        setReservations(res.reservations);
-      }
-    });
+    refreshReservations();
   }, []);
 
   const handleSubmit = async () => {
@@ -113,17 +137,7 @@ function App() {
     console.log('Reservation scheduled successfully');
 
     // Refresh reservations after scheduling
-    const allReservationsResponse = await getAllScheduledReservations();
-    if ('error' in getAllScheduledReservations) {
-      alert(
-        `Error fetching scheduled reservations: ${getAllScheduledReservations.error}`,
-      );
-      return;
-    } else {
-      setReservations(
-        (allReservationsResponse as GetScheduleResponse).reservations,
-      );
-    }
+    refreshReservations();
   };
 
   const handleDelete = async (reservation: ReserveInfo) => {
@@ -147,17 +161,7 @@ function App() {
     console.log('Reservation deleted successfully');
 
     // Refresh reservations after deletion
-    const allReservationsResponse = await getAllScheduledReservations();
-    if ('error' in getAllScheduledReservations) {
-      alert(
-        `Error fetching scheduled reservations: ${getAllScheduledReservations.error}`,
-      );
-      return;
-    } else {
-      setReservations(
-        (allReservationsResponse as GetScheduleResponse).reservations,
-      );
-    }
+    refreshReservations();
   };
 
   return (
