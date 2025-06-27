@@ -6,12 +6,14 @@ import {
   getCourtOrder,
   updateCourtOrder,
 } from '@/services/court-order.service';
+import { attemptLogin } from '@/services/login-check.service';
 import {
+  deleteScheduledReservation,
   getAllScheduledReservations,
   scheduleReservation,
 } from '@/services/schedule.service';
+import { GetScheduleResponse } from '@/types/api.type';
 import { ReserveInfo } from '@/types/reserve.type';
-import { attemptLogin } from '@/services/login-check.service';
 import {
   generateDateOptions,
   generateTimeOptions,
@@ -89,37 +91,72 @@ function App() {
       return;
     }
 
-    await updateCourtOrder(courtOrder).then((res) => {
-      if ('error' in res) {
-        alert(`Error updating court order: ${res.error}`);
-      }
-    });
+    const courtOrderResponse = await updateCourtOrder(courtOrder);
+    if ('error' in courtOrderResponse) {
+      alert(`Error updating court order: ${courtOrderResponse.error}`);
+      return;
+    }
 
-    await attemptLogin(username, password).then((res) => {
-      console.log('Login check successful');
-      if ('error' in res) {
-        alert(`Login failed: ${res.error}`);
-      }
-    });
+    const loginResponse = await attemptLogin(username, password);
+    if ('error' in loginResponse) {
+      alert(`Login failed: ${loginResponse.error}`);
+      return;
+    }
+    console.log('Login successful');
 
-    await scheduleReservation(body).then((res) => {
-      if ('error' in res) {
-        alert(`Reservation schedule failed: ${res.error}`);
-      } else if (res.success) {
-        alert('Reservation schedule successful!');
-      } else {
-        alert('Reservation schedule failed for an unknown reason.');
-      }
-    });
+    const scheduleResponse = await scheduleReservation(body);
+    if ('error' in scheduleResponse) {
+      alert(`Reservation schedule failed: ${scheduleResponse.error}`);
+      return;
+    }
+    console.log('Reservation scheduled successfully');
 
     // Refresh reservations after scheduling
-    await getAllScheduledReservations().then((res) => {
-      if ('error' in res) {
-        alert(`Error fetching reservations: ${res.error}`);
-      } else {
-        setReservations(res.reservations);
-      }
+    const allReservationsResponse = await getAllScheduledReservations();
+    if ('error' in getAllScheduledReservations) {
+      alert(
+        `Error fetching scheduled reservations: ${getAllScheduledReservations.error}`,
+      );
+      return;
+    } else {
+      setReservations(
+        (allReservationsResponse as GetScheduleResponse).reservations,
+      );
+    }
+  };
+
+  const handleDelete = async (reservation: ReserveInfo) => {
+    const { username, date } = reservation;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete the reservation for ${username} on ${date.month + 1}/${date.date}/${date.year}?`,
+      )
+    ) {
+      return;
+    }
+
+    const deleteResponse = await deleteScheduledReservation({
+      username,
+      date,
     });
+    if ('error' in deleteResponse) {
+      alert(`Error deleting reservation: ${deleteResponse.error}`);
+      return;
+    }
+    console.log('Reservation deleted successfully');
+
+    // Refresh reservations after deletion
+    const allReservationsResponse = await getAllScheduledReservations();
+    if ('error' in getAllScheduledReservations) {
+      alert(
+        `Error fetching scheduled reservations: ${getAllScheduledReservations.error}`,
+      );
+      return;
+    } else {
+      setReservations(
+        (allReservationsResponse as GetScheduleResponse).reservations,
+      );
+    }
   };
 
   return (
@@ -220,9 +257,14 @@ function App() {
               <JobList>
                 {reservations.map((reservation, idx) => (
                   <li key={idx}>
-                    <strong>{reservation.username}:</strong>{' '}
-                    {`${reservation.date.month + 1}/${reservation.date.date}/${reservation.date.year} `}
-                    {`from ${timeOptions[reservation.startTimeIdx]} to ${timeOptions[reservation.endTimeIdx]}`}
+                    <span>
+                      <strong>{reservation.username}:</strong>{' '}
+                      {`${reservation.date.month + 1}/${reservation.date.date}/${reservation.date.year} `}
+                      {`from ${timeOptions[reservation.startTimeIdx]} to ${timeOptions[reservation.endTimeIdx]}`}
+                    </span>
+                    <button onClick={() => handleDelete(reservation)}>
+                      Delete
+                    </button>
                   </li>
                 ))}
               </JobList>

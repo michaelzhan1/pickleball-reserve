@@ -97,3 +97,35 @@ export function addReservation(
   );
   return true;
 }
+
+export function deleteReservation(
+  username,
+  date,
+) {
+  const dateString = `${date.year}-${date.month + 1}-${date.date}`;
+  const jobId = jobIdMap.get(dateString);
+  if (!jobId) {
+    console.error(`No job found for date ${dateString}`);
+    return false;
+  }
+
+  const reservations = reservationMap.get(jobId);
+  if (!reservations) {
+    console.error(`No reservations found for job ID ${jobId}`);
+    return false;
+  }
+
+  const index = reservations.findIndex(
+    (res) => res.username === username && res.date.year === date.year &&
+             res.date.month === date.month && res.date.date === date.date
+  );
+
+  if (index === -1) {
+    console.error(`No reservation found for user ${username} on ${dateString}`);
+    return false;
+  }
+
+  reservations.splice(index, 1);
+  console.log(`Deleted reservation for ${username} on ${dateString}.`);
+  return true;
+}

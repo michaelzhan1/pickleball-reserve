@@ -1,10 +1,14 @@
-import cors from 'cors';
-import 'dotenv/config';
-import express from 'express';
 import { authCheck } from './auth.js';
 import { getOrder, setOrder } from './courtOrder.js';
 import { attemptLogin } from './loginCheck.js';
-import { addReservation, getAllReservations } from './schedule.js';
+import {
+  addReservation,
+  deleteReservation,
+  getAllReservations,
+} from './schedule.js';
+import cors from 'cors';
+import 'dotenv/config';
+import express from 'express';
 
 const app = express();
 const port = 3000;
@@ -22,7 +26,7 @@ app.post('/auth', (req, res) => {
   } else {
     res.status(401).json({ error: 'Authentication failed' });
   }
-})
+});
 
 app.get('/courtOrder', (_req, res) => {
   res.json({
@@ -65,11 +69,12 @@ app.post('/loginCheck', async (req, res) => {
 });
 
 app.get('/schedule', async (_req, res) => {
-  res.json({ reservations: getAllReservations()});
+  res.json({ reservations: getAllReservations() });
 });
 
 app.post('/schedule', async (req, res) => {
-  const { username, password, date, startTimeIdx, endTimeIdx, courtOrder } = req.body;
+  const { username, password, date, startTimeIdx, endTimeIdx, courtOrder } =
+    req.body;
   console.log('Scheduling reservation...');
   const result = addReservation(
     username,
@@ -77,14 +82,31 @@ app.post('/schedule', async (req, res) => {
     date,
     startTimeIdx,
     endTimeIdx,
-    courtOrder
+    courtOrder,
   );
   if (result) {
     console.log('Reservation scheduled successfully');
     res.json({ success: true });
   } else {
     console.error('Failed to schedule reservation: Reservation already exists');
-    res.status(400).json({ error: 'Reservation already scheduled on this day' });
+    res
+      .status(400)
+      .json({ error: 'Reservation already scheduled on this day' });
+  }
+});
+
+app.delete('/schedule', (req, res) => {
+  const { username, date } = req.body;
+  console.log(`Deleting reservation for ${username} on ${date}`);
+  const result = deleteReservation(username, date);
+  if (result) {
+    console.log('Reservation deleted successfully');
+    res.json({ success: true });
+  } else {
+    console.error('Failed to delete reservation: No reservation found');
+    res
+      .status(404)
+      .json({ error: 'No reservation found for this user on this date' });
   }
 });
 

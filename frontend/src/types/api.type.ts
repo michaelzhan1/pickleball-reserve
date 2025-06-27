@@ -1,7 +1,13 @@
-import { ReserveInfo } from "@/types/reserve.type";
+import { DateParts } from '@/types/datetime.type';
+import { ReserveInfo } from '@/types/reserve.type';
 
 // request types
-export type ScheduleRequest = ReserveInfo;
+export type PostScheduleRequest = ReserveInfo;
+
+export type DeleteScheduleRequest = {
+  username: string;
+  date: DateParts;
+};
 
 // response types
 export interface ErrorResponse {
@@ -25,6 +31,10 @@ export interface GetScheduleResponse {
 }
 
 export interface PostScheduleResponse {
+  success: boolean;
+}
+
+export interface DeleteScheduleReponse {
   success: boolean;
 }
 
