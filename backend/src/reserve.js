@@ -61,6 +61,7 @@ export async function attemptReserve(
         (1000 * 60 * 60 * 24),
     );
     for (let i = 0; i < daysBetween; i++) {
+      await page.waitForTimeout(100);
       await page.locator('button.btn.interactive-grid-date-next').click();
     }
 
@@ -153,6 +154,13 @@ export async function attemptReserve(
     // confirm reservation
     await page.getByRole('button', { name: 'Add To Cart' }).click();
     await page.getByText('Checkout').click();
+
+    const agreeCheckbox = page.getByRole('checkbox');
+    if (!(await agreeCheckbox.isChecked())) {
+      await agreeCheckbox.click();
+    }
+    await page.getByRole('button', { name: 'Submit Responses' }).click();
+    
     await page.getByRole('button', { name: 'Review Transaction' }).click();
     await page.getByRole('button', { name: 'Complete Transaction' }).click();
 
