@@ -1,10 +1,10 @@
-let order = '1,2,3,4,5,6';
+let order: string = '1,2,3,4,5,6';
 
-export function getOrder() {
+export function getOrder(): string {
   return order;
 }
 
-export function setOrder(newOrder) {
+export function setOrder(newOrder: string) {
   if (checkValidOrder(newOrder)) {
     order = newOrder;
   } else {
@@ -12,6 +12,6 @@ export function setOrder(newOrder) {
   }
 }
 
-function checkValidOrder(order) {
+function checkValidOrder(order: string): boolean {
   return /^[1-6]{1}(,[1-6]){5}$/.test(order);
 }

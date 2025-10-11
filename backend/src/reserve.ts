@@ -1,16 +1,17 @@
 import { expect } from '@playwright/test';
 
-import { generateTimeOptions } from './utils/time.util.js';
+import { PlaywrightResult, ReserveInfo } from './types/types';
+import { generateTimeOptions } from './utils/time.util';
 import { chromium } from 'playwright';
 
-export async function attemptReserve(
+export async function attemptReserve({
   username,
   password,
   date,
   startTimeIdx,
   endTimeIdx,
   courtOrder,
-) {
+}: ReserveInfo): Promise<PlaywrightResult> {
   const timeOptions = generateTimeOptions();
   const courts = courtOrder.split(',').map((court) => Number(court.trim()));
 
@@ -57,7 +58,8 @@ export async function attemptReserve(
       .locator('input.datepicker.interactive-grid-date')
       .inputValue();
     const daysBetween = Math.floor(
-      (new Date(date.year, date.month, date.date) - new Date(displayedDate)) /
+      (new Date(date.year, date.month, date.date).getTime() -
+        new Date(displayedDate).getTime()) /
         (1000 * 60 * 60 * 24),
     );
     for (let i = 0; i < daysBetween; i++) {
@@ -160,7 +162,7 @@ export async function attemptReserve(
       await agreeCheckbox.click();
     }
     await page.getByRole('button', { name: 'Submit Responses' }).click();
-    
+
     await page.getByRole('button', { name: 'Review Transaction' }).click();
     await page.getByRole('button', { name: 'Complete Transaction' }).click();
 
@@ -173,7 +175,9 @@ export async function attemptReserve(
       success: false,
       errorMessage:
         errorMessage ||
-        error.message ||
+        (typeof error === 'object' && error !== null && 'message' in error
+          ? (error as { message?: string }).message
+          : undefined) ||
         'An unexpected error occurred during reservation attempt.',
     };
   } finally {

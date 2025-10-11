@@ -1,9 +1,10 @@
-import { attemptReserve } from './reserve.js';
+import { attemptReserve } from './reserve';
+import { DateParts, ReserveInfo } from './types/types';
 import { CronJob } from 'cron';
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid';
 
-const reservationMap = new Map(); // job id -> {username, password, date, startTimeIdx, endTimeIdx, courtOrder}[]
-const jobIdMap = new Map(); // date string -> job id
+const reservationMap = new Map<string, ReserveInfo[]>(); // job id -> {username, password, date, startTimeIdx, endTimeIdx, courtOrder}[]
+const jobIdMap = new Map<string, string>(); // date string -> job id
 
 // return reservation informations
 export function getAllReservations() {
@@ -11,14 +12,14 @@ export function getAllReservations() {
 }
 
 // add a reservation and create a job if it doesn't exist
-export function addReservation(
+export function addReservation({
   username,
   password,
   date,
   startTimeIdx,
   endTimeIdx,
   courtOrder,
-) {
+}: ReserveInfo): boolean {
   const dateString = `${date.year}-${date.month + 1}-${date.date}`;
   const reservation = {
     username,
@@ -29,7 +30,7 @@ export function addReservation(
     courtOrder,
   };
 
-  let jobId = jobIdMap.get(dateString);
+  let jobId = jobIdMap.get(dateString)!;
 
   // If a job ID for this date doesn't exist, create a new one
   if (!jobId) {
@@ -48,16 +49,16 @@ export function addReservation(
         startTimeIdx,
         endTimeIdx,
         courtOrder,
-      } of reservationMap.get(jobId)) {
+      } of reservationMap.get(jobId)!) {
         try {
-          await attemptReserve(
+          await attemptReserve({
             username,
             password,
             date,
             startTimeIdx,
             endTimeIdx,
             courtOrder,
-          );
+          });
         } catch (error) {
           console.error(
             `Error during reservation attempt for ${username} on ${dateString}:`,
@@ -80,18 +81,20 @@ export function addReservation(
     job.start();
   }
 
-  const existingReservation = reservationMap.get(jobId).find(
-    (res) =>
-      res.username === username &&
-      res.date.year === date.year &&
-      res.date.month === date.month &&
-      res.date.date === date.date
-  );
+  const existingReservation = reservationMap
+    .get(jobId)!
+    .find(
+      (res) =>
+        res.username === username &&
+        res.date.year === date.year &&
+        res.date.month === date.month &&
+        res.date.date === date.date,
+    );
   if (existingReservation) {
     return false; // Reservation already exists for this user on this date
   }
 
-  reservationMap.get(jobId).push(reservation);
+  reservationMap.get(jobId)!.push(reservation);
 
   console.log(
     `Added reservation for ${username} on ${dateString} at times ${startTimeIdx}-${endTimeIdx} for courts ${courtOrder}.`,
@@ -99,10 +102,7 @@ export function addReservation(
   return true;
 }
 
-export function deleteReservation(
-  username,
-  date,
-) {
+export function deleteReservation(username: string, date: DateParts) {
   const dateString = `${date.year}-${date.month + 1}-${date.date}`;
   const jobId = jobIdMap.get(dateString);
   if (!jobId) {
@@ -117,8 +117,11 @@ export function deleteReservation(
   }
 
   const index = reservations.findIndex(
-    (res) => res.username === username && res.date.year === date.year &&
-             res.date.month === date.month && res.date.date === date.date
+    (res) =>
+      res.username === username &&
+      res.date.year === date.year &&
+      res.date.month === date.month &&
+      res.date.date === date.date,
   );
 
   if (index === -1) {
