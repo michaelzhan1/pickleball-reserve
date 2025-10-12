@@ -6,12 +6,12 @@ import {
   deleteReservation,
   getAllReservations,
 } from './schedule';
-import { getClient } from './utils/database.util';
+import { getPool } from './utils/database.util';
 import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
 
-const client = await getClient();
+const pool = await getPool();
 
 const app = express();
 const port = 3000;
@@ -72,14 +72,14 @@ app.post('/loginCheck', async (req, res) => {
 });
 
 app.get('/schedule', async (_req, res) => {
-  res.json({ reservations: await getAllReservations(client) });
+  res.json({ reservations: await getAllReservations(pool) });
 });
 
 app.post('/schedule', async (req, res) => {
   const { username, password, date, startTimeIdx, endTimeIdx, courtOrder } =
     req.body;
   console.log('Scheduling reservation...');
-  const result = await addReservation(client, {
+  const result = await addReservation(pool, {
     username,
     password,
     date,
