@@ -1,4 +1,4 @@
-import { ReserveInfo } from '../types/types';
+import { ReserveInfo, ReserveInfoDB } from '../types/types';
 import 'dotenv/config';
 import { Client } from 'pg';
 
@@ -36,3 +36,16 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
     ],
   );
 }
+
+export async function retrieveAllReservations(
+  client: Client,
+): Promise<ReserveInfoDB[]> {
+  const res = await client.query<ReserveInfoDB>(
+    `
+SELECT id, username, password, day_string, date, month, year, start_time_idx, end_time_idx, court_order
+FROM reservation`,
+  );
+  return res.rows;
+}
+
+export async function retrieveAllReservationsOnDay() {}

@@ -14,6 +14,10 @@ export interface ReserveInfo {
   courtOrder: string;
 }
 
+export interface ReserveInfoDB extends ReserveInfo {
+  id: number;
+}
+
 export interface PlaywrightResult {
   success: boolean;
   errorMessage: string;

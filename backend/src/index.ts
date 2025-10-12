@@ -72,7 +72,7 @@ app.post('/loginCheck', async (req, res) => {
 });
 
 app.get('/schedule', async (_req, res) => {
-  res.json({ reservations: getAllReservations() });
+  res.json({ reservations: await getAllReservations(client) });
 });
 
 app.post('/schedule', async (req, res) => {

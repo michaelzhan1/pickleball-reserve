@@ -1,6 +1,6 @@
 import { attemptReserve } from './reserve';
 import { DateParts, ReserveInfo } from './types/types';
-import { storeReservation } from './utils/database.util';
+import { retrieveAllReservations, storeReservation } from './utils/database.util';
 import { CronJob } from 'cron';
 import { Client } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
@@ -9,8 +9,8 @@ const reservationMap = new Map<string, ReserveInfo[]>(); // job id -> {username,
 const jobIdMap = new Map<string, string>(); // date string -> job id
 
 // return reservation informations
-export function getAllReservations() {
-  return Array.from(reservationMap.values()).flat();
+export async function getAllReservations(client: Client) {
+  return retrieveAllReservations(client);
 }
 
 // add a reservation and create a job if it doesn't exist
