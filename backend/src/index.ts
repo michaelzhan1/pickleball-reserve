@@ -6,9 +6,12 @@ import {
   deleteReservation,
   getAllReservations,
 } from './schedule';
+import { getClient } from './utils/database.util';
 import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
+
+const client = await getClient();
 
 const app = express();
 const port = 3000;
@@ -76,7 +79,7 @@ app.post('/schedule', async (req, res) => {
   const { username, password, date, startTimeIdx, endTimeIdx, courtOrder } =
     req.body;
   console.log('Scheduling reservation...');
-  const result = addReservation({
+  const result = await addReservation(client, {
     username,
     password,
     date,

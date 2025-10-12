@@ -19,6 +19,7 @@
     "cron": "^4.3.1",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "pg": "^8.16.3",
     "playwright": "^1.53.1",
     "uuid": "^11.1.0"
   },
@@ -27,6 +28,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.7.2",
+    "@types/pg": "^8.15.5",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.5",
     "globals": "^16.2.0",

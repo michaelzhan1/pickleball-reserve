@@ -8,5 +8,3 @@ export interface ReserveInfo {
   endTimeIdx: number;
   courtOrder: string;
 }
-
-export interface ReserveResult

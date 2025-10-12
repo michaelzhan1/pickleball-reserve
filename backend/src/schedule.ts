@@ -1,6 +1,8 @@
 import { attemptReserve } from './reserve';
 import { DateParts, ReserveInfo } from './types/types';
+import { storeReservation } from './utils/database.util';
 import { CronJob } from 'cron';
+import { Client } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
 
 const reservationMap = new Map<string, ReserveInfo[]>(); // job id -> {username, password, date, startTimeIdx, endTimeIdx, courtOrder}[]
@@ -12,14 +14,26 @@ export function getAllReservations() {
 }
 
 // add a reservation and create a job if it doesn't exist
-export function addReservation({
-  username,
-  password,
-  date,
-  startTimeIdx,
-  endTimeIdx,
-  courtOrder,
-}: ReserveInfo): boolean {
+export async function addReservation(
+  client: Client,
+  {
+    username,
+    password,
+    date,
+    startTimeIdx,
+    endTimeIdx,
+    courtOrder,
+  }: ReserveInfo,
+): Promise<boolean> {
+  await storeReservation(client, {
+    username,
+    password,
+    date,
+    startTimeIdx,
+    endTimeIdx,
+    courtOrder,
+  });
+
   const dateString = `${date.year}-${date.month + 1}-${date.date}`;
   const reservation = {
     username,
