@@ -22,7 +22,7 @@ export async function attemptLogin(username, password) {
     // Fill in the username and password fields
     const loginDropdown = page
       .getByRole('link')
-      .filter({ hasText: 'Log In/Create Account' });
+      .filter({ hasText: 'Sign In' });
     await loginDropdown.click();
     const usernameField = page.getByLabel('Email/Username');
     const passwordField = page.getByLabel('Password');

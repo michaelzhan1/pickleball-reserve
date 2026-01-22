@@ -35,7 +35,7 @@ export async function attemptReserve(
     // Log in
     const loginDropdown = page
       .getByRole('link')
-      .filter({ hasText: 'Log In/Create Account' });
+      .filter({ hasText: 'Sign In' });
     await loginDropdown.click();
     const usernameField = page.getByLabel('Email/Username');
     const passwordField = page.getByLabel('Password');
