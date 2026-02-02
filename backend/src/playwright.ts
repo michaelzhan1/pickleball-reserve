@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 
-import { PlaywrightResult, ReserveInfo } from './types/types';
+import { PlaywrightResult, NewReservation } from './types/types';
 import { generateTimeOptions } from './utils/time.util';
 import { chromium } from 'playwright';
 
@@ -11,7 +11,7 @@ export async function attemptReserve({
   startTimeIdx,
   endTimeIdx,
   courtOrder,
-}: ReserveInfo): Promise<PlaywrightResult> {
+}: NewReservation): Promise<PlaywrightResult> {
   const timeOptions = generateTimeOptions();
   const courts = courtOrder.split(',').map((court) => Number(court.trim()));
 
@@ -58,7 +58,7 @@ export async function attemptReserve({
       .locator('input.datepicker.interactive-grid-date')
       .inputValue();
     const daysBetween = Math.floor(
-      (new Date(date.year, date.month, date.date).getTime() -
+      (new Date(date.year, date.month, date.day).getTime() -
         new Date(displayedDate).getTime()) /
         (1000 * 60 * 60 * 24),
     );

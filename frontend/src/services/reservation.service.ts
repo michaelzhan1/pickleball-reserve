@@ -28,9 +28,7 @@ export async function addReservation(
 export async function deleteReservation(
   id: number,
 ): Promise<DeleteReservationResponse | ErrorResponse> {
-  return fetch(`${import.meta.env.VITE_BACKEND_URL}/reservations`, {
+  return fetch(`${import.meta.env.VITE_BACKEND_URL}/reservations/${id}`, {
     method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id }),
   }).then((res) => res.json());
 }

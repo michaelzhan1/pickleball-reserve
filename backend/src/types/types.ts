@@ -1,11 +1,11 @@
 export interface DateParts {
-  dayString: string;
-  date: number;
+  dayOfWeek: string;
+  day: number;
   month: number;
   year: number;
 }
 
-export interface ReserveInfo {
+export interface NewReservation {
   username: string;
   password: string;
   date: DateParts;
@@ -14,7 +14,7 @@ export interface ReserveInfo {
   courtOrder: string;
 }
 
-export interface ReserveInfoDB extends ReserveInfo {
+export interface ExistingReservation extends NewReservation {
   id: number;
 }
 

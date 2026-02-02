@@ -1,17 +1,18 @@
 import { authCheck } from './auth';
-import { getOrder, setOrder } from './courtOrder';
 import { attemptLogin } from './loginCheck';
 import {
   addReservation,
   deleteReservation,
   getAllReservations,
-} from './schedule';
-import { getPool } from './utils/database.util';
+  getReservation,
+} from './reservation';
 import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
+import { Pool } from 'pg';
+import { checkValidOrder } from './utils/courtOrder.util';
 
-const pool = await getPool();
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 const app = express();
 const port = 3000;
@@ -31,32 +32,6 @@ app.post('/auth', (req, res) => {
   }
 });
 
-app.get('/courtOrder', (_req, res) => {
-  res.json({
-    order: getOrder(),
-  });
-});
-
-app.put('/courtOrder', (req, res) => {
-  const { order } = req.body;
-  try {
-    if (!order) {
-      res.status(400).json({ error: 'Order is required' });
-      return;
-    }
-    setOrder(order);
-    res.json({ success: true });
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ error: error.message });
-      return;
-    }
-    // Handle unexpected errors
-    console.error('Unexpected error:', error);
-    res.status(500).json({ error: 'An unexpected error occurred' });
-  }
-});
-
 app.post('/loginCheck', async (req, res) => {
   console.log('Checking login credentials...');
   const { username, password } = req.body;
@@ -71,13 +46,20 @@ app.post('/loginCheck', async (req, res) => {
   });
 });
 
-app.get('/schedule', async (_req, res) => {
+app.get('/reservations', async (_req, res) => {
   res.json({ reservations: await getAllReservations(pool) });
 });
 
-app.post('/schedule', async (req, res) => {
+app.post('/reservations', async (req, res) => {
   const { username, password, date, startTimeIdx, endTimeIdx, courtOrder } =
     req.body;
+
+  if (!checkValidOrder(courtOrder)) {
+    console.error('Invalid court order format:', courtOrder);
+    res.status(400).json({ error: 'Invalid court order format' });
+    return;
+  }
+
   console.log('Scheduling reservation...');
   const result = await addReservation(pool, {
     username,
@@ -98,18 +80,29 @@ app.post('/schedule', async (req, res) => {
   }
 });
 
-app.delete('/schedule', (req, res) => {
-  const { username, date } = req.body;
-  console.log(`Deleting reservation for ${username} on ${date}`);
-  const result = deleteReservation(username, date);
+app.delete('/reservations/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) {
+    res.status(400).json({ error: 'Invalid reservation ID' });
+    return;
+  }
+
+  const row = await getReservation(pool, id);
+  if (row === null) {
+    res.status(404).json({ error: 'Reservation not found' });
+    return;
+  }
+
+  console.log(`Deleting reservation with id ${id}`);
+  const result = await deleteReservation(pool, id);
   if (result) {
     console.log('Reservation deleted successfully');
     res.json({ success: true });
   } else {
-    console.error('Failed to delete reservation: No reservation found');
+    console.error('Failed to delete reservation');
     res
-      .status(404)
-      .json({ error: 'No reservation found for this user on this date' });
+      .status(500)
+      .json({ error: 'Failed to delete reservation' });
   }
 });
 
