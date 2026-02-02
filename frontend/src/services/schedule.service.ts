@@ -9,7 +9,7 @@ import {
 export async function getAllReservations(): Promise<
   GetReservationsResponse | ErrorResponse
 > {
-  return fetch(`${import.meta.env.VITE_BACKEND_URL}/schedule`, {
+  return fetch(`${import.meta.env.VITE_BACKEND_URL}/reservations`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   }).then((res) => res.json());
@@ -18,7 +18,7 @@ export async function getAllReservations(): Promise<
 export async function addReservation(
   body: PostReservationRequest,
 ): Promise<PostReservationResponse | ErrorResponse> {
-  return fetch(`${import.meta.env.VITE_BACKEND_URL}/schedule`, {
+  return fetch(`${import.meta.env.VITE_BACKEND_URL}/reservations`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -28,7 +28,7 @@ export async function addReservation(
 export async function deleteReservation(
   id: number,
 ): Promise<DeleteReservationResponse | ErrorResponse> {
-  return fetch(`${import.meta.env.VITE_BACKEND_URL}/schedule`, {
+  return fetch(`${import.meta.env.VITE_BACKEND_URL}/reservations`, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id }),
