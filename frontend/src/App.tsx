@@ -8,7 +8,7 @@ import {
   deleteReservation,
   getAllReservations,
   addReservation,
-} from '@/services/schedule.service';
+} from '@/services/reservation.service';
 import { ReservationFormdata, ReservationListItem } from '@/types/reserve.type';
 import {
   generateDateOptions,
