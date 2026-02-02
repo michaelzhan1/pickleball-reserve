@@ -18,6 +18,19 @@ export interface ExistingReservation extends NewReservation {
   id: number;
 }
 
+export interface ReservationDBRow {
+  id: number;
+  username: string;
+  password: string;
+  day_of_week: string;
+  day: number;
+  month: number;
+  year: number;
+  start_time_idx: number;
+  end_time_idx: number;
+  court_order: string;
+}
+
 export interface PlaywrightResult {
   success: boolean;
   errorMessage: string;

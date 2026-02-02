@@ -1,14 +1,31 @@
-import { ExistingReservation, NewReservation } from './types/types';
+import { ExistingReservation, NewReservation, ReservationDBRow } from './types/types';
 import { Pool } from 'pg';
 
+function mapRowToReservation(row: ReservationDBRow): ExistingReservation {
+  return {
+    id: row.id,
+    username: row.username,
+    password: row.password,
+    date: {
+      dayOfWeek: row.day_of_week,
+      day: row.day,
+      month: row.month,
+      year: row.year,
+    },
+    startTimeIdx: row.start_time_idx,
+    endTimeIdx: row.end_time_idx,
+    courtOrder: row.court_order,
+  }
+}
+
 // return reservation informations
-export async function getAllReservations(pool: Pool) {
-  const rows = await pool.query<ExistingReservation>(
+export async function getAllReservations(pool: Pool): Promise<ExistingReservation[]> {
+  const rows = await pool.query<ReservationDBRow>(
     `
 SELECT id, username, password, day_of_week, day, month, year, start_time_idx, end_time_idx, court_order
 FROM reservation`,
   );
-  return rows.rows;
+  return rows.rows.map(mapRowToReservation);
 }
 
 // return single reservation
@@ -16,7 +33,7 @@ export async function getReservation(
   pool: Pool,
   id: number,
 ): Promise<ExistingReservation | null> {
-  const rows = await pool.query<ExistingReservation>(
+  const rows = await pool.query<ReservationDBRow>(
     `
 SELECT id, username, password, day_of_week, day, month, year, start_time_idx, end_time_idx, court_order
 FROM reservation
@@ -28,7 +45,7 @@ WHERE id=$1`,
     return null;
   }
 
-  return rows.rows[0];
+  return mapRowToReservation(rows.rows[0]);
 }
 
 // add a reservation and create a job if it doesn't exist

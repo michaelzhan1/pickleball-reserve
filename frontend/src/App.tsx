@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import styled from 'styled-components';
 
@@ -45,7 +45,7 @@ function App() {
   }, []);
 
   // handle auth submit
-  const handleAuthSubmit = (e: React.FormEvent) => {
+  const handleAuthSubmit = (e: FormEvent) => {
     e.preventDefault();
 
     attemptAuth(authPassword).then((res) => {
@@ -107,7 +107,8 @@ function App() {
   }, []);
 
   // handle form submit
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
     setLoading(true);
 
     if (formdata.endTimeIdx <= formdata.startTimeIdx) {
@@ -116,16 +117,16 @@ function App() {
       return;
     }
 
-    const loginResponse = await attemptLogin(
-      formdata.username,
-      formdata.password,
-    );
-    if ('error' in loginResponse) {
-      alert(`Login failed: ${loginResponse.error}`);
-      setLoading(false);
-      return;
-    }
-    console.log('Login successful');
+    // const loginResponse = await attemptLogin(
+    //   formdata.username,
+    //   formdata.password,
+    // );
+    // if ('error' in loginResponse) {
+    //   alert(`Login failed: ${loginResponse.error}`);
+    //   setLoading(false);
+    //   return;
+    // }
+    // console.log('Login successful');
 
     const scheduleResponse = await addReservation({
       username: formdata.username,
@@ -165,6 +166,7 @@ function App() {
       return;
     }
     console.log('Reservation deleted successfully');
+    alert('Reservation deleted successfully!');
 
     // Refresh reservations after deletion
     refreshReservations();
