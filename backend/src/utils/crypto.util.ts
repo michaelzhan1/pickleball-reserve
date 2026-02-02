@@ -9,14 +9,12 @@ export function encrypt(text: string): EncPassData {
     throw new Error('AES_KEY is not defined in environment variables');
   }
 
-  if (!process.env.AES_IV) {
-    throw new Error('AES_IV is not defined in environment variables');
-  }
+  const iv = crypto.randomBytes(12);
 
   const cipher = crypto.createCipheriv(
     algorithm,
     Buffer.from(process.env.AES_KEY, 'base64'),
-    Buffer.from(process.env.AES_IV, 'base64'),
+    iv,
   );
 
   const encrypted = Buffer.concat([
@@ -28,7 +26,7 @@ export function encrypt(text: string): EncPassData {
 
   return {
     ciphertext: encrypted.toString('base64'),
-    iv: process.env.AES_IV,
+    iv: iv.toString('base64'),
     authTag: authTag.toString('base64'),
   }
 }
@@ -36,10 +34,6 @@ export function encrypt(text: string): EncPassData {
 export function decrypt(data: EncPassData): string {
   if (!process.env.AES_KEY) {
     throw new Error('AES_KEY is not defined in environment variables');
-  }
-
-  if (!process.env.AES_IV) {
-    throw new Error('AES_IV is not defined in environment variables');
   }
 
   const decipher = crypto.createDecipheriv(
@@ -57,9 +51,3 @@ export function decrypt(data: EncPassData): string {
 
   return decrypted.toString('utf8');
 }
-
-const testString = 'Hello, World!';
-const encryptedData = encrypt(testString);
-console.log('Encrypted Data:', encryptedData);
-const decryptedString = decrypt(encryptedData);
-console.log('Decrypted String:', decryptedString);

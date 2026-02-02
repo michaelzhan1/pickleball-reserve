@@ -1,11 +1,19 @@
-import { ExistingReservation, NewReservation, ReservationDBRow } from './types/types';
+import {
+  ExistingReservation,
+  NewReservation,
+  ReservationDBRow,
+} from './types/types';
 import { Pool } from 'pg';
 
 function mapRowToReservation(row: ReservationDBRow): ExistingReservation {
   return {
     id: row.id,
     username: row.username,
-    password: row.password,
+    encPassData: {
+      ciphertext: row.enc_password,
+      iv: row.iv,
+      authTag: row.auth_tag,
+    },
     date: {
       dayOfWeek: row.day_of_week,
       day: row.day,
@@ -15,14 +23,16 @@ function mapRowToReservation(row: ReservationDBRow): ExistingReservation {
     startTimeIdx: row.start_time_idx,
     endTimeIdx: row.end_time_idx,
     courtOrder: row.court_order,
-  }
+  };
 }
 
 // return reservation informations
-export async function getAllReservations(pool: Pool): Promise<ExistingReservation[]> {
+export async function getAllReservations(
+  pool: Pool,
+): Promise<ExistingReservation[]> {
   const rows = await pool.query<ReservationDBRow>(
     `
-SELECT id, username, password, day_of_week, day, month, year, start_time_idx, end_time_idx, court_order
+SELECT id, username, enc_password, iv, auth_tag, day_of_week, day, month, year, start_time_idx, end_time_idx, court_order
 FROM reservation`,
   );
   return rows.rows.map(mapRowToReservation);
@@ -35,7 +45,7 @@ export async function getReservation(
 ): Promise<ExistingReservation | null> {
   const rows = await pool.query<ReservationDBRow>(
     `
-SELECT id, username, password, day_of_week, day, month, year, start_time_idx, end_time_idx, court_order
+SELECT id, username, enc_password, iv, auth_tag, day_of_week, day, month, year, start_time_idx, end_time_idx, court_order
 FROM reservation
 WHERE id=$1`,
     [id],
@@ -53,7 +63,7 @@ export async function addReservation(
   pool: Pool,
   {
     username,
-    password,
+    encPassData,
     date,
     startTimeIdx,
     endTimeIdx,
@@ -75,11 +85,13 @@ WHERE username=$1 AND day=$2 AND month=$3 AND year=$4`,
   // insert new reservation
   await pool.query(
     `
-INSERT INTO reservation (username, password, day_of_week, day, month, year, start_time_idx, end_time_idx, court_order)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+INSERT INTO reservation (username, enc_password, iv, auth_tag, day_of_week, day, month, year, start_time_idx, end_time_idx, court_order)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
     [
       username,
-      password,
+      encPassData.ciphertext,
+      encPassData.iv,
+      encPassData.authTag,
       date.dayOfWeek,
       date.day,
       date.month,

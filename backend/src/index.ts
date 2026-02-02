@@ -61,12 +61,12 @@ app.post('/reservations', async (req, res) => {
     return;
   }
 
-  const encPassword = encrypt(password);
+  const encPassData = encrypt(password);
 
   console.log('Scheduling reservation...');
   const result = await addReservation(pool, {
     username,
-    password: encPassword,
+    encPassData,
     date,
     startTimeIdx,
     endTimeIdx,

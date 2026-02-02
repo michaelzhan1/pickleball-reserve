@@ -7,7 +7,7 @@ export interface DateParts {
 
 export interface NewReservation {
   username: string;
-  password: string;
+  encPassData: EncPassData;
   date: DateParts;
   startTimeIdx: number;
   endTimeIdx: number;
@@ -21,7 +21,7 @@ export interface ExistingReservation extends NewReservation {
 export interface ReservationDBRow {
   id: number;
   username: string;
-  password: string;
+  enc_password: string;
   iv: string;
   auth_tag: string;
   day_of_week: string;
