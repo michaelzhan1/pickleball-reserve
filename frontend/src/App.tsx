@@ -3,17 +3,13 @@ import { FaTrash } from 'react-icons/fa';
 import styled from 'styled-components';
 
 import { attemptAuth } from '@/services/auth.service';
-import {
-  getCourtOrder,
-  updateCourtOrder,
-} from '@/services/court-order.service';
 import { attemptLogin } from '@/services/login-check.service';
 import {
-  deleteScheduledReservation,
-  getAllScheduledReservations,
-  scheduleReservation,
+  deleteReservation,
+  getAllReservations,
+  addReservation,
 } from '@/services/schedule.service';
-import { ReserveInfo } from '@/types/reserve.type';
+import { ReservationFormdata, ReservationListItem } from '@/types/reserve.type';
 import {
   generateDateOptions,
   generateTimeOptions,
@@ -23,15 +19,17 @@ function App() {
   const dateOptions = generateDateOptions();
   const timeOptions = generateTimeOptions();
 
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [dateIdx, setDateIdx] = useState<number>(0);
-  const [startTimeIdx, setStartTimeIdx] = useState<number>(23); // 7:30 pm
-  const [endTimeIdx, setEndTimeIdx] = useState<number>(26); // 9:00 pm
-  const [courtOrder, setCourtOrder] = useState<string>('');
+  const [formdata, setFormdata] = useState<ReservationFormdata>({
+    username: '',
+    password: '',
+    dateIdx: 0,
+    startTimeIdx: 23, // 7:30 pm
+    endTimeIdx: 26, // 9:0 pm
+    courtOrder: '',
+  });
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [reservations, setReservations] = useState<ReserveInfo[]>([]);
+  const [reservations, setReservations] = useState<ReservationListItem[]>([]);
 
   const [authPassword, setAuthPassword] = useState<string>('');
   const [authPassed, setAuthPassed] = useState<boolean>(false);
@@ -47,7 +45,9 @@ function App() {
   }, []);
 
   // handle auth submit
-  const handleAuthSubmit = () => {
+  const handleAuthSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
     attemptAuth(authPassword).then((res) => {
       if ('error' in res) {
         alert(`Authentication failed: ${res.error}`);
@@ -58,8 +58,20 @@ function App() {
     });
   };
 
+  // load court order cookie
+  useEffect(() => {
+    const courtOrderCookie = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('courtOrder='));
+    if (courtOrderCookie) {
+      const value = decodeURIComponent(courtOrderCookie.split('=')[1] || '');
+      setFormdata((prev) => ({ ...prev, courtOrder: value }));
+    }
+  }, []);
+
+  // get reservations
   function refreshReservations() {
-    getAllScheduledReservations().then((res) => {
+    getAllReservations().then((res) => {
       if ('error' in res) {
         alert(`Error fetching scheduled reservations: ${res.error}`);
       } else {
@@ -70,12 +82,12 @@ function App() {
           const dateA = new Date(
             a.date.year,
             a.date.month,
-            a.date.date,
+            a.date.day,
           ).getTime();
           const dateB = new Date(
             b.date.year,
             b.date.month,
-            b.date.date,
+            b.date.day,
           ).getTime();
 
           if (dateA !== dateB) {
@@ -89,50 +101,25 @@ function App() {
     });
   }
 
-  // get court order on load
+  // set reservations on load
   useEffect(() => {
-    getCourtOrder().then((res) => {
-      if ('error' in res) {
-        alert(`Error fetching court order: ${res.error}`);
-      } else {
-        setCourtOrder(res.order);
-      }
-    });
     refreshReservations();
   }, []);
 
+  // handle form submit
   const handleSubmit = async () => {
-    if (!username || !password) {
-      alert('Username and password are required.');
-      return;
-    }
-
     setLoading(true);
 
-    // for now, just log the values and update court order
-    const body = {
-      username,
-      password,
-      date: dateOptions[dateIdx].value,
-      startTimeIdx,
-      endTimeIdx,
-      courtOrder,
-    };
-
-    if (endTimeIdx <= startTimeIdx) {
+    if (formdata.endTimeIdx <= formdata.startTimeIdx) {
       alert('End time must be after start time.');
       setLoading(false);
       return;
     }
 
-    const courtOrderResponse = await updateCourtOrder(courtOrder);
-    if ('error' in courtOrderResponse) {
-      alert(`Error updating court order: ${courtOrderResponse.error}`);
-      setLoading(false);
-      return;
-    }
-
-    const loginResponse = await attemptLogin(username, password);
+    const loginResponse = await attemptLogin(
+      formdata.username,
+      formdata.password,
+    );
     if ('error' in loginResponse) {
       alert(`Login failed: ${loginResponse.error}`);
       setLoading(false);
@@ -140,7 +127,14 @@ function App() {
     }
     console.log('Login successful');
 
-    const scheduleResponse = await scheduleReservation(body);
+    const scheduleResponse = await addReservation({
+      username: formdata.username,
+      password: formdata.password,
+      date: dateOptions[formdata.dateIdx].value,
+      startTimeIdx: formdata.startTimeIdx,
+      endTimeIdx: formdata.endTimeIdx,
+      courtOrder: formdata.courtOrder,
+    });
     if ('error' in scheduleResponse) {
       alert(`Reservation schedule failed: ${scheduleResponse.error}`);
       setLoading(false);
@@ -154,20 +148,18 @@ function App() {
     setLoading(false);
   };
 
-  const handleDelete = async (reservation: ReserveInfo) => {
-    const { username, date } = reservation;
+  // handle deleting a reservation
+  const handleDelete = async (reservation: ReservationListItem) => {
+    const { id, username, date } = reservation;
     if (
       !window.confirm(
-        `Are you sure you want to delete the reservation for ${username} on ${date.month + 1}/${date.date}/${date.year}?`,
+        `Are you sure you want to delete the reservation for ${username} on ${date.month + 1}/${date.day}/${date.year}?`,
       )
     ) {
       return;
     }
 
-    const deleteResponse = await deleteScheduledReservation({
-      username,
-      date,
-    });
+    const deleteResponse = await deleteReservation(id);
     if ('error' in deleteResponse) {
       alert(`Error deleting reservation: ${deleteResponse.error}`);
       return;
@@ -181,30 +173,40 @@ function App() {
   return (
     <PageContainer>
       {!authPassed ? (
-        <FormContainer style={{ maxWidth: '400px' }}>
+        <FormContainer
+          onSubmit={handleAuthSubmit}
+          style={{ maxWidth: '400px' }}
+        >
           <div className='form-field'>
             <label htmlFor='auth'>Enter password:</label>
             <input
               id='auth'
               type='password'
+              required
               value={authPassword}
               onChange={(e) => setAuthPassword(e.target.value)}
             />
           </div>
-          <button onClick={handleAuthSubmit}>Submit</button>
+          <button type='submit'>Submit</button>
         </FormContainer>
       ) : (
         <>
           <h1>Court Reservation</h1>
           <ContentContainer>
-            <FormContainer>
+            <FormContainer onSubmit={handleSubmit}>
               <div className='form-field'>
                 <label htmlFor='username'>Username</label>
                 <input
                   id='username'
                   type='text'
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  value={formdata.username}
+                  onChange={(e) =>
+                    setFormdata((prev) => ({
+                      ...prev,
+                      username: e.target.value,
+                    }))
+                  }
                 />
               </div>
               <div className='form-field'>
@@ -212,16 +214,27 @@ function App() {
                 <input
                   id='password'
                   type='password'
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  value={formdata.password}
+                  onChange={(e) =>
+                    setFormdata((prev) => ({
+                      ...prev,
+                      password: e.target.value,
+                    }))
+                  }
                 />
               </div>
               <div className='form-field'>
                 <label htmlFor='date'>Date</label>
                 <select
                   id='date'
-                  value={dateIdx}
-                  onChange={(e) => setDateIdx(parseInt(e.target.value, 10))}
+                  value={formdata.dateIdx}
+                  onChange={(e) =>
+                    setFormdata((prev) => ({
+                      ...prev,
+                      dateIdx: parseInt(e.target.value, 10),
+                    }))
+                  }
                 >
                   {dateOptions.map(({ label }, i) => (
                     <option key={i} value={i}>
@@ -234,9 +247,12 @@ function App() {
                 <label htmlFor='start-time'>Start Time</label>
                 <select
                   id='start-time'
-                  value={startTimeIdx}
+                  value={formdata.startTimeIdx}
                   onChange={(e) =>
-                    setStartTimeIdx(parseInt(e.target.value, 10))
+                    setFormdata((prev) => ({
+                      ...prev,
+                      startTimeIdx: parseInt(e.target.value, 10),
+                    }))
                   }
                 >
                   {timeOptions.map((time, i) => (
@@ -250,8 +266,13 @@ function App() {
                 <label htmlFor='end-time'>End Time</label>
                 <select
                   id='end-time'
-                  value={endTimeIdx}
-                  onChange={(e) => setEndTimeIdx(parseInt(e.target.value, 10))}
+                  value={formdata.endTimeIdx}
+                  onChange={(e) =>
+                    setFormdata((prev) => ({
+                      ...prev,
+                      endTimeIdx: parseInt(e.target.value, 10),
+                    }))
+                  }
                 >
                   {timeOptions.map((time, i) => (
                     <option key={i} value={i}>
@@ -265,12 +286,18 @@ function App() {
                 <input
                   id='court-order'
                   type='text'
-                  value={courtOrder}
-                  onChange={(e) => setCourtOrder(e.target.value)}
+                  required
+                  value={formdata.courtOrder}
+                  onChange={(e) =>
+                    setFormdata((prev) => ({
+                      ...prev,
+                      courtOrder: e.target.value,
+                    }))
+                  }
                 />
               </div>
               <div>
-                <button onClick={handleSubmit} disabled={loading}>
+                <button type='submit' disabled={loading}>
                   Submit
                 </button>
                 {loading && (
@@ -287,7 +314,7 @@ function App() {
                   <li key={idx}>
                     <span>
                       <strong>{reservation.username}:</strong>{' '}
-                      {`${reservation.date.dayString} ${reservation.date.month + 1}/${reservation.date.date}/${reservation.date.year} `}
+                      {`${reservation.date.dayOfWeek} ${reservation.date.month + 1}/${reservation.date.day}/${reservation.date.year} `}
                       {`from ${timeOptions[reservation.startTimeIdx]} to ${timeOptions[reservation.endTimeIdx]}`}
                     </span>
                     <button onClick={() => handleDelete(reservation)}>
@@ -338,7 +365,7 @@ const ContentContainer = styled.div`
   }
 `;
 
-const FormContainer = styled.div`
+const FormContainer = styled.form`
   display: flex;
   flex-direction: column;
   align-items: flex-start;

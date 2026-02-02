@@ -1,6 +1,6 @@
-import type { DateOption } from "@/types/datetime.type";
+import type { DateOption } from '@/types/datetime.type';
 
-const numToDay: { [key: number]: string } = {
+const numToDayOfWeek: { [key: number]: string } = {
   0: 'Sunday',
   1: 'Monday',
   2: 'Tuesday',
@@ -30,19 +30,19 @@ export function generateDateOptions(): DateOption[] {
   date.setDate(date.getDate() + 3);
 
   return Array.from({ length: 7 }).map(() => {
-    const day = numToDay[date.getDay()];
+    const dayOfWeek = numToDayOfWeek[date.getDay()];
     const month = date.getMonth();
-    const dateNumber = date.getDate();
+    const day = date.getDate();
     const year = date.getFullYear();
-    const description = `${day}, ${numToMonth[month]} ${dateNumber}`;
+    const description = `${dayOfWeek}, ${numToMonth[month]} ${day}`;
     date.setDate(date.getDate() + 1);
     return {
       label: description,
       value: {
-        dayString: day,
-        date: dateNumber,
-        month: month,
-        year: year,
+        dayOfWeek,
+        day,
+        month,
+        year,
       },
     };
   });
@@ -53,7 +53,7 @@ export function generateTimeOptions(): string[] {
   let time = 8;
   let hourString: string;
   while (time <= 22) {
-    hourString = `${(time - 1) % 12 + 1 < 10 ? '0' : ''}${(time - 1) % 12 + 1}`
+    hourString = `${((time - 1) % 12) + 1 < 10 ? '0' : ''}${((time - 1) % 12) + 1}`;
     times.push(`${hourString}:00 ${time < 12 ? 'AM' : 'PM'}`);
     if (time !== 22) times.push(`${hourString}:30 ${time < 12 ? 'AM' : 'PM'}`);
     time++;

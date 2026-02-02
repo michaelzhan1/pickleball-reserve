@@ -1,14 +1,13 @@
 import {
+  DeleteReservationResponse,
   ErrorResponse,
-  PostScheduleRequest,
-  PostScheduleResponse,
-  GetScheduleResponse,
-  DeleteScheduleRequest,
-  DeleteScheduleReponse,
+  GetReservationsResponse,
+  PostReservationRequest,
+  PostReservationResponse
 } from '@/types/api.type';
 
-export async function getAllScheduledReservations(): Promise<
-  GetScheduleResponse | ErrorResponse
+export async function getAllReservations(): Promise<
+  GetReservationsResponse | ErrorResponse
 > {
   return fetch(`${import.meta.env.VITE_BACKEND_URL}/schedule`, {
     method: 'GET',
@@ -16,9 +15,9 @@ export async function getAllScheduledReservations(): Promise<
   }).then((res) => res.json());
 }
 
-export async function scheduleReservation(
-  body: PostScheduleRequest,
-): Promise<PostScheduleResponse | ErrorResponse> {
+export async function addReservation(
+  body: PostReservationRequest,
+): Promise<PostReservationResponse | ErrorResponse> {
   return fetch(`${import.meta.env.VITE_BACKEND_URL}/schedule`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -26,12 +25,12 @@ export async function scheduleReservation(
   }).then((res) => res.json());
 }
 
-export async function deleteScheduledReservation(
-  body: DeleteScheduleRequest,
-): Promise<DeleteScheduleReponse | ErrorResponse> {
+export async function deleteReservation(
+  id: number,
+): Promise<DeleteReservationResponse | ErrorResponse> {
   return fetch(`${import.meta.env.VITE_BACKEND_URL}/schedule`, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ id }),
   }).then((res) => res.json());
 }
