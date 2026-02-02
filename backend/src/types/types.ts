@@ -22,6 +22,8 @@ export interface ReservationDBRow {
   id: number;
   username: string;
   password: string;
+  iv: string;
+  auth_tag: string;
   day_of_week: string;
   day: number;
   month: number;
@@ -34,4 +36,10 @@ export interface ReservationDBRow {
 export interface PlaywrightResult {
   success: boolean;
   errorMessage: string;
+}
+
+export interface EncPassData {
+  ciphertext: string;
+  iv: string;
+  authTag: string;
 }

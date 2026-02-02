@@ -11,6 +11,7 @@ import 'dotenv/config';
 import express from 'express';
 import { Pool } from 'pg';
 import { checkValidOrder } from './utils/courtOrder.util';
+import { encrypt } from './utils/crypto.util';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
@@ -60,10 +61,12 @@ app.post('/reservations', async (req, res) => {
     return;
   }
 
+  const encPassword = encrypt(password);
+
   console.log('Scheduling reservation...');
   const result = await addReservation(pool, {
     username,
-    password,
+    password: encPassword,
     date,
     startTimeIdx,
     endTimeIdx,
