@@ -4,8 +4,8 @@ export interface DateOption {
 }
 
 export interface DateParts {
-  dayString: string;
-  date: number;
+  dayOfWeek: string;
+  day: number;
   month: number;
   year: number;
 }

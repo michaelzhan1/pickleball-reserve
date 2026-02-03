@@ -1,0 +1,3 @@
+export function checkValidOrder(order: string): boolean {
+  return /^[1-6]{1}(,[1-6]){5}$/.test(order);
+}

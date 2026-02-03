@@ -1,12 +1,14 @@
 import { DateParts } from '@/types/datetime.type';
-import { ReserveInfo } from '@/types/reserve.type';
+import { ReservationListItem } from '@/types/reserve.type';
 
 // request types
-export type PostScheduleRequest = ReserveInfo;
-
-export type DeleteScheduleRequest = {
+export type PostReservationRequest = {
   username: string;
+  password: string;
   date: DateParts;
+  startTimeIdx: number;
+  endTimeIdx: number;
+  courtOrder: string;
 };
 
 // response types
@@ -14,27 +16,19 @@ export interface ErrorResponse {
   error: string;
 }
 
-export interface GetCourtOrderResponse {
-  order: string;
-}
-
-export interface PutCourtOrderResponse {
-  success: boolean;
-}
-
 export interface LoginCheckResponse {
   success: boolean;
 }
 
-export interface GetScheduleResponse {
-  reservations: ReserveInfo[];
+export interface GetReservationsResponse {
+  reservations: ReservationListItem[];
 }
 
-export interface PostScheduleResponse {
+export interface PostReservationResponse {
   success: boolean;
 }
 
-export interface DeleteScheduleReponse {
+export interface DeleteReservationResponse {
   success: boolean;
 }
 

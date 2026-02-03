@@ -1,7 +1,8 @@
-export function generateTimeOptions() {
-  const times = [];
-  let time = 8;
-  let hourString;
+function generateTimeOptions(): string[] {
+  const times: string[] = [];
+  let time: number = 8;
+  let hourString: string;
+  
   while (time <= 22) {
     hourString = `${((time - 1) % 12) + 1 < 10 ? '0' : ''}${((time - 1) % 12) + 1}`;
     times.push(`${hourString}:00 ${time < 12 ? 'AM' : 'PM'}`);
@@ -10,3 +11,5 @@ export function generateTimeOptions() {
   }
   return times;
 }
+
+export const timeOptions: string[] = generateTimeOptions();

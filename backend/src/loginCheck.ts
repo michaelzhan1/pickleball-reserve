@@ -1,6 +1,10 @@
+import { PlaywrightResult } from './types/types';
 import { chromium } from 'playwright';
 
-export async function attemptLogin(username, password) {
+export async function attemptLogin(
+  username: string,
+  password: string,
+): Promise<PlaywrightResult> {
   const browser = await chromium.launch({
     headless: true,
   });
@@ -17,7 +21,7 @@ export async function attemptLogin(username, password) {
       errorMessage = dialog.message();
       console.error('Dialog message:', errorMessage);
       await dialog.dismiss();
-    })
+    });
 
     // Fill in the username and password fields
     const loginDropdown = page
@@ -38,11 +42,16 @@ export async function attemptLogin(username, password) {
     return {
       success: true,
       errorMessage: '',
-    }
+    };
   } catch (error) {
     return {
       success: false,
-      errorMessage: errorMessage || error.message || 'An unexpected error occurred during login attempt.',
+      errorMessage:
+        errorMessage ||
+        (typeof error === 'object' && error !== null && 'message' in error
+          ? (error as { message?: string }).message
+          : undefined) ||
+        'An unexpected error occurred during reservation attempt.',
     };
   } finally {
     await browser.close();

@@ -1,19 +1,15 @@
-import js from '@eslint/js';
+// @ts-check
+import eslint from '@eslint/js';
 
-import eslintConfigPrettier from 'eslint-config-prettier';
-import { defineConfig, globalIgnores } from 'eslint/config';
-import globals from 'globals';
+import { defineConfig } from 'eslint/config';
+import tseslint from 'typescript-eslint';
 
-export default defineConfig([
+export default defineConfig(
+  eslint.configs.recommended,
+  tseslint.configs.recommended,
   {
-    files: ['**/*.{js,mjs,cjs}'],
-    plugins: { js },
-    extends: ['js/recommended'],
+    rules: {
+      'object-curly-spacing': ['error', 'always'],
+    },
   },
-  {
-    files: ['**/*.{js,mjs,cjs}'],
-    languageOptions: { globals: globals.node },
-  },
-  eslintConfigPrettier,
-  globalIgnores(['**/node_modules/**']),
-]);
+);
