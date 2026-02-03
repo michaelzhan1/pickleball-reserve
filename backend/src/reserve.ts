@@ -1,22 +1,23 @@
 import { expect } from '@playwright/test';
 
 import { PlaywrightResult, NewReservation } from './types/types';
-import { generateTimeOptions } from './utils/time.util';
 import { chromium } from 'playwright';
+import { timeOptions } from './utils/time.util';
+import { decrypt } from './utils/crypto.util';
 
 export async function attemptReserve({
   username,
-  password,
+  encPassData,
   date,
   startTimeIdx,
   endTimeIdx,
   courtOrder,
 }: NewReservation): Promise<PlaywrightResult> {
-  const timeOptions = generateTimeOptions();
   const courts = courtOrder.split(',').map((court) => Number(court.trim()));
+  const password = decrypt(encPassData);
 
   const browser = await chromium.launch({
-    headless: true,
+    headless: false,
   });
   const context = await browser.newContext();
   const page = await context.newPage();

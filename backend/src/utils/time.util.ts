@@ -1,4 +1,4 @@
-export function generateTimeOptions(): string[] {
+function generateTimeOptions(): string[] {
   const times: string[] = [];
   let time: number = 8;
   let hourString: string;
@@ -11,3 +11,5 @@ export function generateTimeOptions(): string[] {
   }
   return times;
 }
+
+export const timeOptions: string[] = generateTimeOptions();

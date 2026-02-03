@@ -12,8 +12,11 @@ import express from 'express';
 import { Pool } from 'pg';
 import { checkValidOrder } from './utils/courtOrder.util';
 import { encrypt } from './utils/crypto.util';
+import { startCron } from './cron';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+
+startCron(pool);
 
 const app = express();
 const port = 3000;

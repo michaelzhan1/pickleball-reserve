@@ -58,6 +58,24 @@ WHERE id=$1`,
   return mapRowToReservation(rows.rows[0]);
 }
 
+// return all on date
+export async function getAllReservationsOnDate(pool: Pool, date: {
+  day: number;
+  month: number;
+  year: number;
+}): Promise<ExistingReservation[]> {
+  console.log(date)
+  const rows = await pool.query<ReservationDBRow>(
+    `
+SELECT id, username, enc_password, iv, auth_tag, day_of_week, day, month, year, start_time_idx, end_time_idx, court_order
+FROM reservation
+WHERE day=$1 AND month=$2 AND year=$3`,
+    [date.day, date.month, date.year],
+  );
+
+  return rows.rows.map(mapRowToReservation);
+}
+
 // add a reservation and create a job if it doesn't exist
 export async function addReservation(
   pool: Pool,
