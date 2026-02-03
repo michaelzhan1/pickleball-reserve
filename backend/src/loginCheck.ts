@@ -6,7 +6,7 @@ export async function attemptLogin(
   password: string,
 ): Promise<PlaywrightResult> {
   const browser = await chromium.launch({
-    headless: false,
+    headless: true,
   });
   const context = await browser.newContext();
   const page = await context.newPage();
