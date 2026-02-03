@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "npm run clean && tsc && tsc-alias",
-    "start": "node dist/index.js",
+    "start": "npm run clean && tsc && tsc-alias && node dist/index.js",
     "dev": "tsx watch src/index.ts"
   },
   "keywords": [],
