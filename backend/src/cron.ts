@@ -1,9 +1,9 @@
-import { CronJob } from 'cron';
-import { Pool } from 'pg';
 import { deleteReservation, getAllReservationsOnDate } from './reservation';
 import { attemptReserve } from './reserve';
 import { ExistingReservation } from './types/types';
 import { timeOptions } from './utils/time.util';
+import { CronJob } from 'cron';
+import { Pool } from 'pg';
 
 export function startCron(pool: Pool) {
   const job = CronJob.from({
@@ -27,7 +27,7 @@ async function runJobs(pool: Pool) {
   console.log(`Found ${jobs.length} reservations to make today`);
   for (const job of jobs) {
     console.log(
-      `Attempting reservation for ${job.username} on ${job.date.day}/${job.date.month + 1}/${job.date.year} from ${timeOptions[job.startTimeIdx]} to ${timeOptions[job.endTimeIdx]}`,
+      `Attempting reservation for ${job.username} on ${job.date.month + 1}/${job.date.day}/${job.date.year} from ${timeOptions[job.startTimeIdx]} to ${timeOptions[job.endTimeIdx]}`,
     );
 
     try {
@@ -45,7 +45,9 @@ async function runJobs(pool: Pool) {
 }
 
 async function getJobs(pool: Pool): Promise<ExistingReservation[]> {
-  const date = new Date();
+  const date = new Date(
+    new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' }),
+  );
   date.setDate(date.getDate() + 2); // Reservations are made 2 days in advance
 
   const reservations = await getAllReservationsOnDate(pool, {

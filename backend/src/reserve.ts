@@ -1,9 +1,9 @@
 import { expect } from '@playwright/test';
 
-import { PlaywrightResult, NewReservation } from './types/types';
-import { chromium } from 'playwright';
-import { timeOptions } from './utils/time.util';
+import { NewReservation, PlaywrightResult } from './types/types';
 import { decrypt } from './utils/crypto.util';
+import { timeOptions } from './utils/time.util';
+import { chromium } from 'playwright';
 
 export async function attemptReserve({
   username,
@@ -35,9 +35,7 @@ export async function attemptReserve({
     });
 
     // Log in
-    const loginDropdown = page
-      .getByRole('link')
-      .filter({ hasText: 'Sign In' });
+    const loginDropdown = page.getByRole('link').filter({ hasText: 'Sign In' });
     await loginDropdown.click();
     const usernameField = page.getByLabel('Email/Username');
     const passwordField = page.getByLabel('Password');
@@ -86,7 +84,7 @@ export async function attemptReserve({
         // click on the court cell
         const courtCell = page
           .getByRole('row')
-          .nth(court)
+          .nth(court - 1)
           .getByRole('gridcell')
           .first();
         await courtCell.click();
@@ -155,16 +153,22 @@ export async function attemptReserve({
     }
 
     // confirm reservation
+    await page.waitForTimeout(500);
     await page.getByRole('button', { name: 'Add To Cart' }).click();
     await page.getByText('Checkout').click();
 
+    await page.waitForTimeout(500);
     const agreeCheckbox = page.getByRole('checkbox');
     if (!(await agreeCheckbox.isChecked())) {
       await agreeCheckbox.click();
     }
+
+    await page.waitForTimeout(500);
     await page.getByRole('button', { name: 'Submit Responses' }).click();
 
+    await page.waitForTimeout(500);
     await page.getByRole('button', { name: 'Review Transaction' }).click();
+    await page.waitForTimeout(500);
     await page.getByRole('button', { name: 'Complete Transaction' }).click();
 
     return {
@@ -182,6 +186,8 @@ export async function attemptReserve({
         'An unexpected error occurred during reservation attempt.',
     };
   } finally {
+    await page.close();
+    await context.close();
     await browser.close();
   }
 }

@@ -54,6 +54,8 @@ export async function attemptLogin(
         'An unexpected error occurred during reservation attempt.',
     };
   } finally {
+    await page.close();
+    await context.close();
     await browser.close();
   }
 }

@@ -64,7 +64,6 @@ export async function getAllReservationsOnDate(pool: Pool, date: {
   month: number;
   year: number;
 }): Promise<ExistingReservation[]> {
-  console.log(date)
   const rows = await pool.query<ReservationDBRow>(
     `
 SELECT id, username, enc_password, iv, auth_tag, day_of_week, day, month, year, start_time_idx, end_time_idx, court_order

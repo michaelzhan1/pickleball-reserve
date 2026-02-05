@@ -2,8 +2,10 @@ FROM mcr.microsoft.com/playwright:v1.57.0-noble
 
 WORKDIR /app
 
-COPY . .
+COPY package.json package-lock.json ./
 RUN npm install
+
+COPY . ./
 
 RUN npm run build
 
