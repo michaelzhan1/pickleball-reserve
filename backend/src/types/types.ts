@@ -43,3 +43,8 @@ export interface EncPassData {
   iv: string;
   authTag: string;
 }
+
+export interface CacheItem {
+  expiry: Date;
+  data: EncPassData;
+}

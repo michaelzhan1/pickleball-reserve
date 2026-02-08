@@ -13,6 +13,7 @@ import { Pool } from 'pg';
 import { checkValidOrder } from './utils/courtOrder.util';
 import { encrypt } from './utils/crypto.util';
 import { startCron } from './cron';
+import { checkCache, setCache } from './utils/cache.util';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
@@ -39,6 +40,11 @@ app.post('/auth', (req, res) => {
 app.post('/loginCheck', async (req, res) => {
   console.log('Checking login credentials...');
   const { username, password } = req.body;
+  if (checkCache(username, password)) {
+    console.log('Login successful (cache hit)');
+    res.json({ success: true });
+    return;
+  }
   attemptLogin(username, password).then(({ success, errorMessage }) => {
     if (success) {
       console.log('Login successful');
@@ -48,6 +54,7 @@ app.post('/loginCheck', async (req, res) => {
       res.status(401).json({ error: errorMessage });
     }
   });
+  setCache(username, password, 10);
 });
 
 app.get('/reservations', async (_req, res) => {
