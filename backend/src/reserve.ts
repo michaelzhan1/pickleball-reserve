@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 
+import { login } from './loginCheck';
 import { NewReservation, PlaywrightResult } from './types/types';
 import { decrypt } from './utils/crypto.util';
 import { timeOptions } from './utils/time.util';
@@ -22,6 +23,7 @@ export async function attemptReserve({
   const context = await browser.newContext();
   const page = await context.newPage();
 
+  let finished = false;
   let errorMessage = null;
   try {
     // Navigate to the login page
@@ -35,18 +37,7 @@ export async function attemptReserve({
     });
 
     // Log in
-    const loginDropdown = page.getByRole('link').filter({ hasText: 'Sign In' });
-    await loginDropdown.click();
-    const usernameField = page.getByLabel('Email/Username');
-    const passwordField = page.getByLabel('Password');
-    await usernameField.fill(username);
-    await passwordField.fill(password);
-
-    const loginButton = page.getByRole('button', { name: 'Log In' });
-    await loginButton.click();
-
-    const logoutButton = page.getByRole('link', { name: 'Log Out' });
-    await logoutButton.waitFor({ state: 'visible', timeout: 5000 });
+    await login(page, username, password, { shouldLogout: false });
 
     // Navigate to reservations
     await page.getByRole('heading', { name: 'Court Reservations' }).click();
@@ -88,6 +79,7 @@ export async function attemptReserve({
           .getByRole('gridcell')
           .first();
         await courtCell.click();
+        await page.waitForTimeout(500);
 
         // select rate
         await page
@@ -170,11 +162,11 @@ export async function attemptReserve({
     await page.getByRole('button', { name: 'Review Transaction' }).click();
     await page.waitForTimeout(500);
     await page.getByRole('button', { name: 'Complete Transaction' }).click();
+    await page
+      .getByRole('heading', { name: 'Transaction Receipt', level: 2 })
+      .waitFor({ state: 'visible' });
 
-    return {
-      success: true,
-      errorMessage: '',
-    };
+    finished = true;
   } catch (error) {
     return {
       success: false,
@@ -189,5 +181,19 @@ export async function attemptReserve({
     await page.close();
     await context.close();
     await browser.close();
+  }
+
+  if (finished) {
+    return {
+      success: true,
+      errorMessage: '',
+    };
+  } else {
+    return {
+      success: false,
+      errorMessage:
+        errorMessage ||
+        'An unexpected error occurred during reservation attempt.',
+    };
   }
 }
