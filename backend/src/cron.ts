@@ -15,7 +15,7 @@ export function startCron(pool: Pool) {
   job.start();
 }
 
-async function runJobs(pool: Pool) {
+export async function runJobs(pool: Pool) {
   console.log('Running cron job to make reservations');
   const jobs = await getJobs(pool);
 
@@ -30,17 +30,17 @@ async function runJobs(pool: Pool) {
       `Attempting reservation for ${job.username} on ${job.date.month + 1}/${job.date.day}/${job.date.year} from ${timeOptions[job.startTimeIdx]} to ${timeOptions[job.endTimeIdx]}`,
     );
 
-    try {
-      await attemptReserve(job);
+    const result = await attemptReserve(job);
+    if (result.success) {
       console.log(`Successfully made reservation for ${job.username}`);
-    } catch (error) {
+    } else {
       console.error(
-        `Failed to make reservation for ${job.username}: ${(error as Error).message}`,
+        `Failed to make reservation for ${job.username}: ${result.errorMessage}`,
       );
-    } finally {
-      await deleteReservation(pool, job.id);
-      console.log(`Removed reservation for ${job.username} from database`);
     }
+    
+    await deleteReservation(pool, job.id);
+    console.log(`Removed reservation for ${job.username} from database`);
   }
 }
 

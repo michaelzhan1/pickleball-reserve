@@ -1,5 +1,5 @@
 import { PlaywrightResult } from './types/types';
-import { chromium } from 'playwright';
+import { Page, chromium } from 'playwright';
 
 export async function attemptLogin(
   username: string,
@@ -23,21 +23,8 @@ export async function attemptLogin(
       await dialog.dismiss();
     });
 
-    // Fill in the username and password fields
-    const loginDropdown = page
-      .getByRole('link')
-      .filter({ hasText: 'Sign In' });
-    await loginDropdown.click();
-    const usernameField = page.getByLabel('Email/Username');
-    const passwordField = page.getByLabel('Password');
-    await usernameField.fill(username);
-    await passwordField.fill(password);
-
-    const loginButton = page.getByRole('button', { name: 'Log In' });
-    await loginButton.click();
-
-    const logoutButton = page.getByRole('link', { name: 'Log Out' });
-    await logoutButton.click({ timeout: 5000 });
+    // do login
+    await login(page, username, password, { shouldLogout: true });
 
     return {
       success: true,
@@ -57,5 +44,29 @@ export async function attemptLogin(
     await page.close();
     await context.close();
     await browser.close();
+  }
+}
+
+export async function login(
+  page: Page,
+  username: string,
+  password: string,
+  { shouldLogout }: { shouldLogout?: boolean },
+): Promise<void> {
+  const loginLink = page.getByRole('link').filter({ hasText: 'Sign In' });
+  await loginLink.click();
+  const usernameField = page.getByLabel('Email/Username');
+  const passwordField = page.getByLabel('Password', { exact: true });
+  await usernameField.fill(username);
+  await passwordField.fill(password);
+
+  const loginButton = page.getByRole('button', { name: 'Sign In' });
+  await loginButton.click();
+
+  const logoutButton = page.getByRole('link', { name: 'Log Out' });
+  if (shouldLogout) {
+    await logoutButton.click({ timeout: 5000 });
+  } else {
+    await logoutButton.waitFor({ state: 'visible', timeout: 5000 });
   }
 }

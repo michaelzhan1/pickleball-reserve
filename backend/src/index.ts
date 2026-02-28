@@ -12,7 +12,7 @@ import express from 'express';
 import { Pool } from 'pg';
 import { checkValidOrder } from './utils/courtOrder.util';
 import { encrypt } from './utils/crypto.util';
-import { startCron } from './cron';
+import { runJobs, startCron } from './cron';
 import { checkCache, setCache } from './utils/cache.util';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -118,6 +118,12 @@ app.delete('/reservations/:id', async (req, res) => {
       .json({ error: 'Failed to delete reservation' });
   }
 });
+
+app.post('/run', async (req, res) => {
+  console.log('Manually triggering reservation attempts');
+  await runJobs(pool);
+  res.status(202).json({ success: true });
+})
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
