@@ -40,7 +40,7 @@ export async function attemptReserve({
     await login(page, username, password, { shouldLogout: false });
 
     // Navigate to reservations
-    await page.getByRole('heading', { name: 'Court Reservations' }).click();
+    await page.getByText('Court Reservations').click();
     await page.getByRole('heading', { name: 'Pickleball Courts' }).click();
 
     // Choose date
