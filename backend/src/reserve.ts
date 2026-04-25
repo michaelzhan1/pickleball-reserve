@@ -40,7 +40,7 @@ export async function attemptReserve({
     await login(page, username, password, { shouldLogout: false });
 
     // Navigate to reservations
-    await page.getByText('Court Reservations').click();
+    await page.getByRole('button', { name: 'Court Reservations' }).click();
     await page.getByRole('heading', { name: 'Pickleball Courts' }).click();
 
     // Choose date
@@ -80,17 +80,6 @@ export async function attemptReserve({
           .first();
         await courtCell.click();
         await page.waitForTimeout(500);
-
-        // select rate
-        await page
-          .locator('div.reservation-rate-types-control > div.selectmenu')
-          .click();
-        await page
-          .locator('div.selectmenu-items.open')
-          .locator('div.selectmenu-item', {
-            hasText: 'Pickleball Court Rental',
-          })
-          .click();
 
         // select start time
         const timeSelectors = page
